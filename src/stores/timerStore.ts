@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { type CategoryId } from '../constants/categories';
-import { zustandMMKVStorage } from '../services/storage';
+import { zustandStorage } from '../services/storage';
 import { dayKey } from '../utils/time';
 
 /** ms tracked per category, for a single calendar day. */
@@ -122,7 +122,7 @@ export const useTimerStore = create<TimerState>()(
     {
       name: 'byte.timer',
       version: 1,
-      storage: createJSONStorage(() => zustandMMKVStorage),
+      storage: createJSONStorage(() => zustandStorage),
       partialize: (s): PersistedState => ({
         dayStartedAt: s.dayStartedAt,
         sessionAnchor: s.sessionAnchor,

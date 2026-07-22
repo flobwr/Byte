@@ -39,7 +39,7 @@ C'est tout. Instantané, tactile, sans friction.
 | Langage        | TypeScript (strict)                    |
 | Navigation     | Expo Router (file-based, typed routes) |
 | État           | Zustand                                |
-| Persistance    | MMKV (synchrone, rapide)               |
+| Persistance    | AsyncStorage (compatible Expo Go)      |
 | Animations     | React Native Reanimated + Gesture Handler |
 | Graphiques     | Victory Native XL (Skia)               |
 | Rendu          | React Native SVG · Expo Image · Expo Blur |
@@ -57,7 +57,7 @@ src/
 │   └── navigation/     # Barre d'onglets flottante
 ├── features/           # Logique par domaine (home, stats)
 ├── hooks/              # useElapsed…
-├── services/           # storage (MMKV)
+├── services/           # storage (AsyncStorage)
 ├── stores/             # timerStore (Zustand)
 ├── constants/          # catégories, registre des mascottes
 ├── theme/              # couleurs, typo, espacements, ombres
