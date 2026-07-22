@@ -12,9 +12,9 @@ import { StatTile } from '../../features/stats/StatTile';
 import { useStats } from '../../features/stats/useStats';
 import { useTimerStore } from '../../stores/timerStore';
 import { colors } from '../../theme/colors';
+import { motion } from '../../theme/motion';
 import { formatShortDate } from '../../utils/dateRange';
 import { spacing } from '../../theme/spacing';
-import { formatDuration } from '../../utils/time';
 
 function Row({
   label,
@@ -83,7 +83,7 @@ export default function ProfileScreen() {
           Byte
         </AppText>
 
-        <Animated.View entering={FadeInDown.duration(420).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(40).duration(motion.duration.reveal)}>
           <Card padding="xxl" cornerRadius="xxl" style={styles.hero}>
             <Mascot name="coffee" size={104} effects />
             <AppText variant="title3" style={styles.heroTitle}>
@@ -96,12 +96,12 @@ export default function ProfileScreen() {
         </Animated.View>
 
         <View style={styles.tileRow}>
-          <StatTile label="Temps total" value={formatDuration(s.allTime)} accent={colors.amber} index={0} />
-          <StatTile label="Activités" value={String(s.activityCount)} accent={colors.accent} index={1} />
+          <StatTile label="Temps total" value={s.allTime} kind="duration" accent={colors.amber} index={2} />
+          <StatTile label="Activités" value={s.activityCount} kind="int" accent={colors.accent} index={3} />
         </View>
         <View style={styles.tileRow}>
-          <StatTile label="Jours suivis" value={String(s.daysTracked)} accent={colors.positive} index={2} />
-          <StatTile label="Catégories" value={String(s.categoriesCount)} accent={colors.accentSoft} index={3} />
+          <StatTile label="Jours suivis" value={s.daysTracked} kind="int" accent={colors.positive} index={4} />
+          <StatTile label="Catégories" value={s.categoriesCount} kind="int" accent={colors.accentSoft} index={5} />
         </View>
 
         <Card padding="none" cornerRadius="xl" style={styles.list}>

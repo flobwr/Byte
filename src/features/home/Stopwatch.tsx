@@ -50,18 +50,13 @@ export function Stopwatch({ elapsedMs, status, mascot, accent }: StopwatchProps)
   }, [elapsedMs, beat]);
 
   const haloStyle = useAnimatedStyle(() => ({
-    opacity: 0.14 + pulse.value * 0.2,
-    transform: [{ scale: 0.92 + pulse.value * 0.16 }],
+    opacity: 0.1 + pulse.value * 0.12,
+    transform: [{ scale: 0.96 + pulse.value * 0.09 }],
   }));
 
   const dotStyle = useAnimatedStyle(() => ({
-    opacity: running ? 0.5 + beat.value * 0.5 : 0.25,
-    transform: [{ scale: 1 + beat.value * 0.7 }],
-  }));
-
-  const timeStyle = useAnimatedStyle(() => ({
-    // Very subtle grow on each tick — draws the eye without being busy.
-    transform: [{ scale: running ? 1 + beat.value * 0.012 : 1 }],
+    opacity: running ? 0.45 + beat.value * 0.45 : 0.25,
+    transform: [{ scale: 1 + beat.value * 0.35 }],
   }));
 
   const displayMascot: MascotKey = status === 'idle' ? IDLE_MASCOT : (mascot ?? RUNNING_MASCOT);
@@ -75,12 +70,12 @@ export function Stopwatch({ elapsedMs, status, mascot, accent }: StopwatchProps)
         <Mascot name={displayMascot} size={172} animated={status !== 'idle'} effects />
       </View>
 
-      <Animated.View style={[styles.timeRow, timeStyle]}>
+      <View style={styles.timeRow}>
         <Animated.View style={[styles.beat, { backgroundColor: accent }, dotStyle]} />
         <AppText variant="title1" tabular style={styles.time} accessibilityLabel="Temps écoulé">
           {formatClock(elapsedMs)}
         </AppText>
-      </Animated.View>
+      </View>
       <AppText variant="overline" color="tertiary" style={styles.caption}>
         {status === 'idle'
           ? 'Prêt à démarrer'

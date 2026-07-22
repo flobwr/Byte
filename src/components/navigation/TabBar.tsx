@@ -1,11 +1,12 @@
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { colors } from '../../theme/colors';
+import { motion } from '../../theme/motion';
 import { radius, spacing } from '../../theme/spacing';
 import { shadows } from '../../theme/shadows';
 import { AppText } from '../ui/AppText';
@@ -63,14 +64,19 @@ function TabButton({
   label: string;
   onPress: () => void;
 }) {
-  const scale = useSharedValue(1);
-  const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const pressed = useSharedValue(0);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 - pressed.value * (1 - motion.press.scale) }],
+    opacity: 1 - pressed.value * (1 - motion.press.dim),
+  }));
+  const to = (v: number) =>
+    withTiming(v, { duration: motion.duration.press, easing: motion.easing.standard });
 
   return (
     <Pressable
       onPress={onPress}
-      onPressIn={() => (scale.value = withSpring(0.9, { damping: 14 }))}
-      onPressOut={() => (scale.value = withSpring(1, { damping: 12 }))}
+      onPressIn={() => (pressed.value = to(1))}
+      onPressOut={() => (pressed.value = to(0))}
       style={styles.tab}
       accessibilityRole="tab"
       accessibilityState={{ selected: focused }}

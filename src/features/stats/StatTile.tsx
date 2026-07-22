@@ -2,35 +2,33 @@ import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
+import { AnimatedCount } from '../../components/ui/AnimatedCount';
 import { AppText } from '../../components/ui/AppText';
 import { colors } from '../../theme/colors';
+import { motion } from '../../theme/motion';
 import { radius, spacing } from '../../theme/spacing';
 
 type StatTileProps = {
   label: string;
-  value: string;
+  value: number;
+  kind: 'duration' | 'int';
   hint?: string;
   accent?: string;
   index?: number;
 };
 
-/** Compact KPI tile — big value, quiet label, optional accent + hint. */
-function StatTileBase({ label, value, hint, accent = colors.accent, index = 0 }: StatTileProps) {
+/** Compact KPI tile — the value counts up; the tile itself never moves. */
+function StatTileBase({ label, value, kind, hint, accent = colors.accent, index = 0 }: StatTileProps) {
   return (
     <Animated.View
-      entering={FadeInDown.delay(index * 60)
-        .duration(400)
-        .springify()
-        .damping(18)}
+      entering={FadeInDown.delay(index * 55).duration(motion.duration.reveal)}
       style={styles.tile}
     >
       <View style={[styles.bar, { backgroundColor: accent }]} />
       <AppText variant="overline" color="tertiary">
         {label}
       </AppText>
-      <AppText variant="title2" tabular style={styles.value}>
-        {value}
-      </AppText>
+      <AnimatedCount value={value} kind={kind} variant="title2" style={styles.value} />
       {hint ? (
         <AppText variant="caption" color="tertiary">
           {hint}

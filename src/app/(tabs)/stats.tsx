@@ -12,6 +12,7 @@ import { StatTile } from '../../features/stats/StatTile';
 import { useStats } from '../../features/stats/useStats';
 import { WeeklyBars } from '../../features/stats/WeeklyBars';
 import { colors } from '../../theme/colors';
+import { motion } from '../../theme/motion';
 import { spacing } from '../../theme/spacing';
 import { formatDuration } from '../../utils/time';
 
@@ -45,7 +46,7 @@ export default function StatsScreen() {
         </AppText>
 
         {/* Day score */}
-        <Animated.View entering={FadeInDown.duration(420).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(40).duration(motion.duration.reveal)}>
           <Card padding="xl" cornerRadius="xxl" style={styles.scoreCard}>
             <RingProgress progress={s.dayScore} label="score" accent={scoreAccent} />
             <View style={styles.scoreBody}>
@@ -64,22 +65,23 @@ export default function StatsScreen() {
 
         {/* KPI tiles */}
         <View style={styles.tileRow}>
-          <StatTile label="Aujourd’hui" value={formatDuration(s.today)} accent={colors.amber} index={0} />
-          <StatTile label="Cette semaine" value={formatDuration(s.week)} accent={colors.accent} index={1} />
+          <StatTile label="Aujourd’hui" value={s.today} kind="duration" accent={colors.amber} index={2} />
+          <StatTile label="Cette semaine" value={s.week} kind="duration" accent={colors.accent} index={3} />
         </View>
         <View style={styles.tileRow}>
-          <StatTile label="Ce mois" value={formatDuration(s.month)} accent={colors.positive} index={2} />
+          <StatTile label="Ce mois" value={s.month} kind="duration" accent={colors.positive} index={4} />
           <StatTile
             label="Depuis le début"
-            value={formatDuration(s.allTime)}
+            value={s.allTime}
+            kind="duration"
             hint={`${s.daysTracked} jour${s.daysTracked > 1 ? 's' : ''} · ${s.activityCount} activité${s.activityCount > 1 ? 's' : ''}`}
             accent={topAccent}
-            index={3}
+            index={5}
           />
         </View>
 
         {/* Weekly chart */}
-        <Animated.View entering={FadeInDown.delay(120).duration(420).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(140).duration(motion.duration.reveal)}>
           <Card padding="xl" cornerRadius="xxl" style={styles.section}>
             <View style={styles.sectionHead}>
               <AppText variant="title3">Cette semaine</AppText>
@@ -93,7 +95,7 @@ export default function StatsScreen() {
 
         {/* Today distribution */}
         {s.todayByCategory.length > 0 && (
-          <Animated.View entering={FadeInDown.delay(160).duration(420).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(200).duration(motion.duration.reveal)}>
             <Card padding="xl" cornerRadius="xxl" style={styles.section}>
               <AppText variant="title3" style={styles.sectionTitle}>
                 Aujourd’hui par activité
@@ -115,7 +117,7 @@ export default function StatsScreen() {
 
         {/* All-time distribution */}
         {s.allTimeByCategory.length > 0 ? (
-          <Animated.View entering={FadeInDown.delay(200).duration(420).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(260).duration(motion.duration.reveal)}>
             <Card padding="xl" cornerRadius="xxl" style={styles.section}>
               <AppText variant="title3" style={styles.sectionTitle}>
                 Répartition globale

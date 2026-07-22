@@ -67,15 +67,15 @@ export default function HomeScreen() {
           { paddingBottom: insets.bottom + spacing.giant + spacing.huge },
         ]}
       >
-        <Animated.View entering={FadeIn.duration(400)}>
+        <Animated.View entering={FadeIn.duration(320)}>
           <HomeHeader totalTodayMs={totalToday} />
         </Animated.View>
 
-        <Animated.View style={styles.hero} entering={FadeInDown.duration(520).springify().damping(20)}>
+        <Animated.View style={styles.hero} entering={FadeInDown.delay(70).duration(380)}>
           <Stopwatch elapsedMs={elapsed} status={status} mascot={lastCategory ? heroMascot : null} accent={accent} />
         </Animated.View>
 
-        <Animated.View style={styles.controls} entering={FadeInDown.delay(80).duration(460).springify().damping(20)}>
+        <Animated.View style={styles.controls} entering={FadeInDown.delay(130).duration(380)}>
           <DayControls
             status={status}
             onStart={startDay}

@@ -1,9 +1,10 @@
 import * as Haptics from 'expo-haptics';
 import { memo } from 'react';
 import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { colors } from '../../theme/colors';
+import { motion } from '../../theme/motion';
 import { radius, spacing } from '../../theme/spacing';
 import { AppText } from './AppText';
 import { Icon, type IconName } from './Icon';
@@ -31,8 +32,14 @@ function ButtonBase({
   haptic = Haptics.ImpactFeedbackStyle.Light,
   style,
 }: ButtonProps) {
-  const scale = useSharedValue(1);
-  const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const pressed = useSharedValue(0);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 - pressed.value * (1 - motion.press.scale) }],
+    opacity: 1 - pressed.value * (1 - motion.press.dim),
+  }));
+
+  const to = (v: number) =>
+    withTiming(v, { duration: motion.duration.press, easing: motion.easing.standard });
 
   const bg: ViewStyle =
     variant === 'primary'
@@ -52,8 +59,8 @@ function ButtonBase({
   return (
     <Pressable
       onPress={handle}
-      onPressIn={() => (scale.value = withSpring(0.96, { damping: 15 }))}
-      onPressOut={() => (scale.value = withSpring(1, { damping: 13 }))}
+      onPressIn={() => (pressed.value = to(1))}
+      onPressOut={() => (pressed.value = to(0))}
       accessibilityRole="button"
       accessibilityLabel={label}
       style={fullWidth ? styles.full : undefined}

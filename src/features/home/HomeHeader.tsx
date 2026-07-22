@@ -1,10 +1,10 @@
 import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { AnimatedCount } from '../../components/ui/AnimatedCount';
 import { AppText } from '../../components/ui/AppText';
 import { colors } from '../../theme/colors';
 import { radius, spacing } from '../../theme/spacing';
-import { formatDuration } from '../../utils/time';
 import { formatLongDate, greeting } from '../../utils/frDate';
 
 type HomeHeaderProps = {
@@ -27,9 +27,7 @@ function HomeHeaderBase({ totalTodayMs }: HomeHeaderProps) {
         <AppText variant="caption" color="tertiary">
           Aujourd’hui
         </AppText>
-        <AppText variant="bodyStrong" tabular color="amber">
-          {formatDuration(totalTodayMs)}
-        </AppText>
+        <AnimatedCount value={totalTodayMs} kind="duration" variant="bodyStrong" color={colors.amber} />
       </View>
     </View>
   );

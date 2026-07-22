@@ -30,10 +30,7 @@ function CategoryGridBase({ totals, disabled, onLog }: CategoryGridProps) {
               <Animated.View
                 key={cat.id}
                 style={styles.cell}
-                entering={FadeInDown.delay(120 + index * 55)
-                  .duration(420)
-                  .springify()
-                  .damping(18)}
+                entering={FadeInDown.delay(190 + index * 45).duration(360)}
               >
                 <CategoryCard
                   category={cat}

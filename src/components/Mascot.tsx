@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { MASCOTS, type MascotKey } from '../constants/mascots';
-import { MascotParticles, PARTICLE_FOR_MASCOT } from './mascot/MascotParticles';
+import { hasParticles, MascotParticles } from './mascot/MascotParticles';
 
 const AImage = Animated.createAnimatedComponent(Image);
 
@@ -65,7 +65,7 @@ function MascotBase({ name, size = 180, animated = true, effects = false, style 
     return { transform: [{ scale }, { translateY }] };
   });
 
-  const particleKind = effects ? PARTICLE_FOR_MASCOT[name] : undefined;
+  const showParticles = effects && hasParticles(name);
 
   const image = (
     <AImage
@@ -78,12 +78,12 @@ function MascotBase({ name, size = 180, animated = true, effects = false, style 
     />
   );
 
-  if (!particleKind) return image;
+  if (!showParticles) return image;
 
   return (
     <View style={{ width: size, height: size }}>
       {image}
-      <MascotParticles kind={particleKind} size={size} />
+      <MascotParticles name={name} size={size} />
     </View>
   );
 }

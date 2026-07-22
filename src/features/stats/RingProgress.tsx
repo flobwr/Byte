@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 
+import { AnimatedCount } from '../../components/ui/AnimatedCount';
 import { AppText } from '../../components/ui/AppText';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
@@ -75,9 +76,7 @@ function RingProgressBase({
         />
       </Svg>
       <View style={styles.center} pointerEvents="none">
-        <AppText variant="title1" tabular style={styles.score}>
-          {Math.round(progress)}
-        </AppText>
+        <AnimatedCount value={progress} kind="int" variant="title1" style={styles.score} />
         <AppText variant="caption" color="tertiary" style={styles.label}>
           {label}
         </AppText>
