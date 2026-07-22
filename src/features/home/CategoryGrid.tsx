@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { type Category, type CategoryId, DEFAULT_CATEGORIES } from '../../constants/categories';
 import { type DayTotals } from '../../stores/timerStore';
@@ -12,7 +13,7 @@ type CategoryGridProps = {
   onLog: (id: CategoryId) => void;
 };
 
-/** 2-column grid of activity cards. Kept as pairs of rows for stable layout. */
+/** 2-column grid of activity cards with a staggered entrance. */
 function CategoryGridBase({ totals, disabled, onLog }: CategoryGridProps) {
   const rows: Category[][] = [];
   for (let i = 0; i < DEFAULT_CATEGORIES.length; i += 2) {
@@ -21,17 +22,28 @@ function CategoryGridBase({ totals, disabled, onLog }: CategoryGridProps) {
 
   return (
     <View style={styles.grid}>
-      {rows.map((row, idx) => (
-        <View key={idx} style={styles.row}>
-          {row.map((cat) => (
-            <CategoryCard
-              key={cat.id}
-              category={cat}
-              totalMs={totals[cat.id] ?? 0}
-              disabled={disabled}
-              onLog={onLog}
-            />
-          ))}
+      {rows.map((row, rowIdx) => (
+        <View key={rowIdx} style={styles.row}>
+          {row.map((cat, colIdx) => {
+            const index = rowIdx * 2 + colIdx;
+            return (
+              <Animated.View
+                key={cat.id}
+                style={styles.cell}
+                entering={FadeInDown.delay(120 + index * 55)
+                  .duration(420)
+                  .springify()
+                  .damping(18)}
+              >
+                <CategoryCard
+                  category={cat}
+                  totalMs={totals[cat.id] ?? 0}
+                  disabled={disabled}
+                  onLog={onLog}
+                />
+              </Animated.View>
+            );
+          })}
           {row.length === 1 && <View style={styles.spacer} />}
         </View>
       ))}
@@ -42,6 +54,7 @@ function CategoryGridBase({ totals, disabled, onLog }: CategoryGridProps) {
 const styles = StyleSheet.create({
   grid: { gap: spacing.md },
   row: { flexDirection: 'row', gap: spacing.md },
+  cell: { flex: 1 },
   spacer: { flex: 1 },
 });
 

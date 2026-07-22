@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useCallback, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Screen } from '../../components/ui/Screen';
@@ -66,13 +67,15 @@ export default function HomeScreen() {
           { paddingBottom: insets.bottom + spacing.giant + spacing.huge },
         ]}
       >
-        <HomeHeader totalTodayMs={totalToday} />
+        <Animated.View entering={FadeIn.duration(400)}>
+          <HomeHeader totalTodayMs={totalToday} />
+        </Animated.View>
 
-        <View style={styles.hero}>
+        <Animated.View style={styles.hero} entering={FadeInDown.duration(520).springify().damping(20)}>
           <Stopwatch elapsedMs={elapsed} status={status} mascot={lastCategory ? heroMascot : null} accent={accent} />
-        </View>
+        </Animated.View>
 
-        <View style={styles.controls}>
+        <Animated.View style={styles.controls} entering={FadeInDown.delay(80).duration(460).springify().damping(20)}>
           <DayControls
             status={status}
             onStart={startDay}
@@ -80,7 +83,7 @@ export default function HomeScreen() {
             onResume={resume}
             onEnd={endDay}
           />
-        </View>
+        </Animated.View>
 
         <View style={styles.gridSection}>
           <CategoryGrid totals={totals} disabled={!isTracking} onLog={onLog} />

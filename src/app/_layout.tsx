@@ -7,10 +7,12 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { useMetaStore } from '../stores/metaStore';
 import { colors } from '../theme/colors';
 
 export default function RootLayout() {
   useEffect(() => {
+    useMetaStore.getState().ensureCreated();
     SystemUI.setBackgroundColorAsync(colors.bg).catch(() => {});
     if (Platform.OS === 'android') {
       NavigationBar.setButtonStyleAsync('light').catch(() => {});

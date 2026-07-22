@@ -1,75 +1,138 @@
-import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Card } from '../../components/ui/Card';
 import { AppText } from '../../components/ui/AppText';
+import { Card } from '../../components/ui/Card';
 import { Screen } from '../../components/ui/Screen';
-import { DEFAULT_CATEGORIES } from '../../constants/categories';
+import { colorForCategory } from '../../constants/categories';
 import { DistributionRow } from '../../features/stats/DistributionRow';
-import { selectTodayTotals, sumTotals, useTimerStore } from '../../stores/timerStore';
+import { RingProgress } from '../../features/stats/RingProgress';
+import { StatTile } from '../../features/stats/StatTile';
+import { useStats } from '../../features/stats/useStats';
+import { WeeklyBars } from '../../features/stats/WeeklyBars';
+import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
 import { formatDuration } from '../../utils/time';
 
 export default function StatsScreen() {
   const insets = useSafeAreaInsets();
-  const totals = useTimerStore(selectTodayTotals);
+  const s = useStats();
 
-  const { total, ranked, max } = useMemo(() => {
-    const rows = DEFAULT_CATEGORIES.map((c) => ({ category: c, ms: totals[c.id] ?? 0 })).filter(
-      (r) => r.ms > 0,
-    );
-    rows.sort((a, b) => b.ms - a.ms);
-    return {
-      total: sumTotals(totals),
-      ranked: rows,
-      max: rows.length ? rows[0]!.ms : 1,
-    };
-  }, [totals]);
+  const scoreAccent =
+    s.dayScore >= 75 ? colors.positive : s.dayScore >= 40 ? colors.accent : colors.amber;
+  const topAccent = s.allTimeByCategory[0]
+    ? colorForCategory(s.allTimeByCategory[0].category.id)
+    : colors.accent;
+
+  const todayMax = s.todayByCategory[0]?.ms ?? 1;
+  const allMax = s.allTimeByCategory[0]?.ms ?? 1;
 
   return (
     <Screen>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing.giant + spacing.huge }]}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: insets.bottom + spacing.giant + spacing.huge },
+        ]}
       >
         <AppText variant="overline" color="tertiary">
           Statistiques
         </AppText>
         <AppText variant="display" style={styles.title}>
-          Ta journée
+          Tableau de bord
         </AppText>
 
-        <Card padding="xxl" cornerRadius="xxl" style={styles.totalCard}>
-          <AppText variant="caption" color="tertiary">
-            TEMPS SUIVI AUJOURD’HUI
-          </AppText>
-          <AppText variant="title1" tabular color="amber" style={styles.bigTotal}>
-            {formatDuration(total)}
-          </AppText>
-          <AppText variant="caption" color="secondary">
-            {ranked.length} activité{ranked.length > 1 ? 's' : ''} enregistrée
-            {ranked.length > 1 ? 's' : ''}
-          </AppText>
-        </Card>
-
-        {ranked.length > 0 ? (
-          <Card padding="xl" cornerRadius="xxl" style={styles.breakdown}>
-            <AppText variant="title3" style={styles.sectionTitle}>
-              Répartition
-            </AppText>
-            <View style={styles.rows}>
-              {ranked.map((r, i) => (
-                <DistributionRow
-                  key={r.category.id}
-                  category={r.category}
-                  ms={r.ms}
-                  fraction={r.ms / max}
-                  index={i}
-                />
-              ))}
+        {/* Day score */}
+        <Animated.View entering={FadeInDown.duration(420).springify().damping(18)}>
+          <Card padding="xl" cornerRadius="xxl" style={styles.scoreCard}>
+            <RingProgress progress={s.dayScore} label="score" accent={scoreAccent} />
+            <View style={styles.scoreBody}>
+              <AppText variant="overline" color="tertiary">
+                Score de journée
+              </AppText>
+              <AppText variant="title2" style={styles.scoreLabel}>
+                {s.scoreLabel}
+              </AppText>
+              <AppText variant="callout" color="secondary">
+                Part de temps concentré aujourd’hui.
+              </AppText>
             </View>
           </Card>
+        </Animated.View>
+
+        {/* KPI tiles */}
+        <View style={styles.tileRow}>
+          <StatTile label="Aujourd’hui" value={formatDuration(s.today)} accent={colors.amber} index={0} />
+          <StatTile label="Cette semaine" value={formatDuration(s.week)} accent={colors.accent} index={1} />
+        </View>
+        <View style={styles.tileRow}>
+          <StatTile label="Ce mois" value={formatDuration(s.month)} accent={colors.positive} index={2} />
+          <StatTile
+            label="Depuis le début"
+            value={formatDuration(s.allTime)}
+            hint={`${s.daysTracked} jour${s.daysTracked > 1 ? 's' : ''} · ${s.activityCount} activité${s.activityCount > 1 ? 's' : ''}`}
+            accent={topAccent}
+            index={3}
+          />
+        </View>
+
+        {/* Weekly chart */}
+        <Animated.View entering={FadeInDown.delay(120).duration(420).springify().damping(18)}>
+          <Card padding="xl" cornerRadius="xxl" style={styles.section}>
+            <View style={styles.sectionHead}>
+              <AppText variant="title3">Cette semaine</AppText>
+              <AppText variant="callout" color="tertiary" tabular>
+                {formatDuration(s.week)}
+              </AppText>
+            </View>
+            <WeeklyBars bars={s.weekBars} max={s.weekMax} accent={colors.accent} />
+          </Card>
+        </Animated.View>
+
+        {/* Today distribution */}
+        {s.todayByCategory.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(160).duration(420).springify().damping(18)}>
+            <Card padding="xl" cornerRadius="xxl" style={styles.section}>
+              <AppText variant="title3" style={styles.sectionTitle}>
+                Aujourd’hui par activité
+              </AppText>
+              <View style={styles.rows}>
+                {s.todayByCategory.map((r, i) => (
+                  <DistributionRow
+                    key={r.category.id}
+                    category={r.category}
+                    ms={r.ms}
+                    fraction={r.ms / todayMax}
+                    index={i}
+                  />
+                ))}
+              </View>
+            </Card>
+          </Animated.View>
+        )}
+
+        {/* All-time distribution */}
+        {s.allTimeByCategory.length > 0 ? (
+          <Animated.View entering={FadeInDown.delay(200).duration(420).springify().damping(18)}>
+            <Card padding="xl" cornerRadius="xxl" style={styles.section}>
+              <AppText variant="title3" style={styles.sectionTitle}>
+                Répartition globale
+              </AppText>
+              <View style={styles.rows}>
+                {s.allTimeByCategory.map((r, i) => (
+                  <DistributionRow
+                    key={r.category.id}
+                    category={r.category}
+                    ms={r.ms}
+                    fraction={r.ms / allMax}
+                    index={i}
+                  />
+                ))}
+              </View>
+            </Card>
+          </Animated.View>
         ) : (
           <Card padding="xxl" cornerRadius="xxl" style={styles.empty}>
             <AppText variant="body" color="secondary" align="center">
@@ -86,9 +149,17 @@ export default function StatsScreen() {
 const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.xl, paddingTop: spacing.md },
   title: { marginTop: spacing.xxs, marginBottom: spacing.xl },
-  totalCard: { alignItems: 'flex-start', gap: spacing.xs },
-  bigTotal: { fontSize: 40, lineHeight: 46, marginVertical: spacing.xxs },
-  breakdown: { marginTop: spacing.lg },
+  scoreCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.xl },
+  scoreBody: { flex: 1, gap: spacing.xxs },
+  scoreLabel: { marginVertical: spacing.xxs },
+  tileRow: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.md },
+  section: { marginTop: spacing.lg },
+  sectionHead: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: spacing.xl,
+  },
   sectionTitle: { marginBottom: spacing.lg },
   rows: { gap: spacing.lg },
   empty: { marginTop: spacing.lg, alignItems: 'center' },

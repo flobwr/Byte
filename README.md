@@ -41,7 +41,7 @@ C'est tout. Instantané, tactile, sans friction.
 | État           | Zustand                                |
 | Persistance    | AsyncStorage (compatible Expo Go)      |
 | Animations     | React Native Reanimated + Gesture Handler |
-| Graphiques     | Victory Native XL (Skia)               |
+| Graphiques     | SVG + Reanimated (animés, compatibles Expo Go) |
 | Rendu          | React Native SVG · Expo Image · Expo Blur |
 | Haptique       | Expo Haptics                           |
 

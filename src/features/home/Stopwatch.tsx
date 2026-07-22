@@ -5,6 +5,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
+  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 
@@ -26,7 +27,7 @@ type StopwatchProps = {
 export function Stopwatch({ elapsedMs, status, mascot, accent }: StopwatchProps) {
   const running = status === 'running';
   const pulse = useSharedValue(0);
-  const seconds = useSharedValue(0);
+  const beat = useSharedValue(0);
 
   useEffect(() => {
     if (running) {
@@ -40,25 +41,30 @@ export function Stopwatch({ elapsedMs, status, mascot, accent }: StopwatchProps)
     }
   }, [running, pulse]);
 
-  // Discreet "time passing" beat, in sync with the ticking seconds.
+  // Discreet per-second beat, synced to the ticking seconds.
   useEffect(() => {
-    seconds.value = withTiming(1, { duration: 180, easing: Easing.out(Easing.ease) }, () => {
-      seconds.value = 0;
-    });
-  }, [elapsedMs, seconds]);
+    beat.value = withSequence(
+      withTiming(1, { duration: 140, easing: Easing.out(Easing.ease) }),
+      withTiming(0, { duration: 320, easing: Easing.inOut(Easing.ease) }),
+    );
+  }, [elapsedMs, beat]);
 
   const haloStyle = useAnimatedStyle(() => ({
-    opacity: 0.16 + pulse.value * 0.22,
+    opacity: 0.14 + pulse.value * 0.2,
     transform: [{ scale: 0.92 + pulse.value * 0.16 }],
   }));
 
   const dotStyle = useAnimatedStyle(() => ({
-    opacity: running ? 0.5 + seconds.value * 0.5 : 0.25,
-    transform: [{ scale: 1 + seconds.value * 0.6 }],
+    opacity: running ? 0.5 + beat.value * 0.5 : 0.25,
+    transform: [{ scale: 1 + beat.value * 0.7 }],
   }));
 
-  const displayMascot: MascotKey =
-    status === 'idle' ? IDLE_MASCOT : (mascot ?? RUNNING_MASCOT);
+  const timeStyle = useAnimatedStyle(() => ({
+    // Very subtle grow on each tick — draws the eye without being busy.
+    transform: [{ scale: running ? 1 + beat.value * 0.012 : 1 }],
+  }));
+
+  const displayMascot: MascotKey = status === 'idle' ? IDLE_MASCOT : (mascot ?? RUNNING_MASCOT);
 
   return (
     <View style={styles.wrap}>
@@ -66,18 +72,18 @@ export function Stopwatch({ elapsedMs, status, mascot, accent }: StopwatchProps)
         <Animated.View
           style={[styles.halo, { backgroundColor: accent, shadowColor: accent }, haloStyle]}
         />
-        <Mascot name={displayMascot} size={168} animated={status !== 'idle'} />
+        <Mascot name={displayMascot} size={172} animated={status !== 'idle'} effects />
       </View>
 
-      <View style={styles.timeRow}>
+      <Animated.View style={[styles.timeRow, timeStyle]}>
         <Animated.View style={[styles.beat, { backgroundColor: accent }, dotStyle]} />
         <AppText variant="title1" tabular style={styles.time} accessibilityLabel="Temps écoulé">
           {formatClock(elapsedMs)}
         </AppText>
-      </View>
-      <AppText variant="caption" color="tertiary" style={styles.caption}>
+      </Animated.View>
+      <AppText variant="overline" color="tertiary" style={styles.caption}>
         {status === 'idle'
-          ? 'Prêt à démarrer ta journée'
+          ? 'Prêt à démarrer'
           : status === 'paused'
             ? 'En pause'
             : 'Temps en cours'}
@@ -89,28 +95,28 @@ export function Stopwatch({ elapsedMs, status, mascot, accent }: StopwatchProps)
 const styles = StyleSheet.create({
   wrap: { alignItems: 'center' },
   mascotZone: {
-    width: 220,
-    height: 200,
+    width: 224,
+    height: 196,
     alignItems: 'center',
     justifyContent: 'center',
   },
   halo: {
     position: 'absolute',
-    width: 180,
-    height: 180,
+    width: 184,
+    height: 184,
     borderRadius: 999,
     shadowOpacity: 0.9,
-    shadowRadius: 40,
+    shadowRadius: 44,
     shadowOffset: { width: 0, height: 0 },
   },
-  timeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.md },
-  beat: { width: 8, height: 8, borderRadius: 4 },
+  timeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginTop: spacing.lg },
+  beat: { width: 9, height: 9, borderRadius: 5 },
   time: {
-    fontSize: 52,
-    lineHeight: 58,
+    fontSize: 76,
+    lineHeight: 82,
     fontWeight: '800',
     color: colors.textPrimary,
-    letterSpacing: 1,
+    letterSpacing: 1.5,
   },
-  caption: { marginTop: spacing.xs, textTransform: 'uppercase', letterSpacing: 1.5 },
+  caption: { marginTop: spacing.sm, letterSpacing: 2 },
 });

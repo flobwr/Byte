@@ -36,7 +36,7 @@ function ButtonBase({
 
   const bg: ViewStyle =
     variant === 'primary'
-      ? { backgroundColor: accent }
+      ? { backgroundColor: accent, shadowColor: accent, ...primaryShadow }
       : variant === 'secondary'
         ? { backgroundColor: colors.surfaceElevated, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairlineStrong }
         : { backgroundColor: 'transparent' };
@@ -70,9 +70,16 @@ function ButtonBase({
   );
 }
 
+const primaryShadow: ViewStyle = {
+  shadowOpacity: 0.35,
+  shadowRadius: 16,
+  shadowOffset: { width: 0, height: 6 },
+  elevation: 6,
+};
+
 const styles = StyleSheet.create({
   base: {
-    height: 54,
+    height: 50,
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
