@@ -34,6 +34,13 @@ type Actions = {
 
 export type TimerState = PersistedState & Actions;
 
+/**
+ * Stable reference for "no data today". Selectors MUST return a referentially
+ * stable value when empty — otherwise useSyncExternalStore sees a new snapshot
+ * on every render and loops forever ("Maximum update depth exceeded").
+ */
+const EMPTY_TOTALS: DayTotals = Object.freeze({});
+
 const initial: PersistedState = {
   dayStartedAt: null,
   sessionAnchor: null,
@@ -136,7 +143,7 @@ export const useTimerStore = create<TimerState>()(
 );
 
 /** Selector helpers (kept outside the store to avoid re-render churn). */
-export const selectTodayTotals = (s: TimerState): DayTotals => s.history[dayKey()] ?? {};
+export const selectTodayTotals = (s: TimerState): DayTotals => s.history[dayKey()] ?? EMPTY_TOTALS;
 
 export const sumTotals = (totals: DayTotals): number =>
   Object.values(totals).reduce<number>((acc, v) => acc + (v ?? 0), 0);
