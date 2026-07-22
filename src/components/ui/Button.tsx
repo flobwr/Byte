@@ -1,7 +1,12 @@
 import * as Haptics from 'expo-haptics';
 import { memo } from 'react';
 import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { colors } from '../../theme/colors';
 import { motion } from '../../theme/motion';
@@ -38,8 +43,9 @@ function ButtonBase({
     opacity: 1 - pressed.value * (1 - motion.press.dim),
   }));
 
-  const to = (v: number) =>
-    withTiming(v, { duration: motion.duration.press, easing: motion.easing.standard });
+  const pressIn = () =>
+    withTiming(1, { duration: motion.duration.press, easing: motion.easing.standard });
+  const release = () => withSpring(0, motion.spring.press);
 
   const bg: ViewStyle =
     variant === 'primary'
@@ -59,8 +65,8 @@ function ButtonBase({
   return (
     <Pressable
       onPress={handle}
-      onPressIn={() => (pressed.value = to(1))}
-      onPressOut={() => (pressed.value = to(0))}
+      onPressIn={() => (pressed.value = pressIn())}
+      onPressOut={() => (pressed.value = release())}
       accessibilityRole="button"
       accessibilityLabel={label}
       style={fullWidth ? styles.full : undefined}

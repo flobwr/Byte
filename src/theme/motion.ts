@@ -24,4 +24,8 @@ export const motion = {
     cardScale: 0.975,
     dim: 0.94,
   },
+  /** Gentle spring for the release "bounce" — a hint of overshoot, never boingy. */
+  spring: {
+    press: { damping: 15, stiffness: 260, mass: 0.5 },
+  },
 } as const;

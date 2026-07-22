@@ -1,7 +1,12 @@
 import * as Haptics from 'expo-haptics';
 import { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { Mascot } from '../../components/Mascot';
 import { AppText } from '../../components/ui/AppText';
@@ -32,8 +37,9 @@ function CategoryCardBase({ category, totalMs, disabled, onLog }: CategoryCardPr
     opacity: 1 - pressed.value * (1 - motion.press.dim),
   }));
 
-  const to = (v: number) =>
-    withTiming(v, { duration: motion.duration.press, easing: motion.easing.standard });
+  const pressIn = () =>
+    withTiming(1, { duration: motion.duration.press, easing: motion.easing.standard });
+  const release = () => withSpring(0, motion.spring.press);
 
   const press = () => {
     if (disabled) return;
@@ -44,8 +50,8 @@ function CategoryCardBase({ category, totalMs, disabled, onLog }: CategoryCardPr
   return (
     <Pressable
       onPress={press}
-      onPressIn={() => (pressed.value = to(1))}
-      onPressOut={() => (pressed.value = to(0))}
+      onPressIn={() => (pressed.value = pressIn())}
+      onPressOut={() => (pressed.value = release())}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={`${category.label}, ${formatDuration(totalMs)} aujourd’hui`}
