@@ -11,6 +11,7 @@ import { useMarkedDayKeys } from '../../features/calendar/useMarkedDayKeys';
 import { MonthGrid } from '../../features/calendar/MonthGrid';
 import { DayHistory } from '../../features/home/DayHistory';
 import { DayNotes } from '../../features/home/DayNotes';
+import { computeDayProfile } from '../../features/stats/dayProfile';
 import { DistributionRow } from '../../features/stats/DistributionRow';
 import { RingProgress } from '../../features/stats/RingProgress';
 import { useTodayKey } from '../../hooks/useDayLog';
@@ -37,6 +38,7 @@ export default function CalendarScreen() {
   const [selectedKey, setSelectedKey] = useState(todayKey);
 
   const detail = useDayDetail(selectedKey);
+  const profile = computeDayProfile(detail.byCategory, detail.total);
   const isToday = selectedKey === todayKey;
   const maxCat = detail.byCategory[0]?.ms ?? 1;
   const scoreAccent =
@@ -97,11 +99,16 @@ export default function CalendarScreen() {
                 Score du jour
               </AppText>
               <AppText variant="title3" style={styles.scoreLabel}>
-                {detail.total > 0 ? detail.scoreLabel : 'Aucune activité'}
+                {profile?.label ?? (detail.total > 0 ? detail.scoreLabel : 'Aucune activité')}
               </AppText>
-              <AppText variant="callout" color="secondary" tabular>
-                {formatDuration(detail.total)} au total
+              <AppText variant="callout" color="secondary">
+                {profile?.sentence ?? 'Aucune activité enregistrée ce jour-là.'}
               </AppText>
+              {detail.total > 0 && (
+                <AppText variant="caption" color="tertiary" tabular>
+                  {formatDuration(detail.total)} au total
+                </AppText>
+              )}
             </View>
           </Card>
         </Animated.View>

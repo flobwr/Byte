@@ -6,6 +6,7 @@ import { AppText } from '../../components/ui/AppText';
 import { Card } from '../../components/ui/Card';
 import { Screen } from '../../components/ui/Screen';
 import { categoryColors } from '../../theme/colors';
+import { computeDayProfile } from '../../features/stats/dayProfile';
 import { DistributionRow } from '../../features/stats/DistributionRow';
 import { RingProgress } from '../../features/stats/RingProgress';
 import { StatTile } from '../../features/stats/StatTile';
@@ -20,6 +21,7 @@ export default function StatsScreen() {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const s = useStats();
+  const profile = computeDayProfile(s.todayByCategory, s.today);
 
   const scoreAccent =
     s.dayScore >= 75 ? colors.positive : s.dayScore >= 40 ? colors.accent : colors.amber;
@@ -52,10 +54,10 @@ export default function StatsScreen() {
                 Score de journée
               </AppText>
               <AppText variant="title2" style={styles.scoreLabel}>
-                {s.scoreLabel}
+                {profile?.label ?? s.scoreLabel}
               </AppText>
               <AppText variant="callout" color="secondary">
-                Part de temps concentré aujourd’hui.
+                {profile?.sentence ?? 'Démarre ta journée pour voir ton profil apparaître.'}
               </AppText>
             </View>
           </Card>
