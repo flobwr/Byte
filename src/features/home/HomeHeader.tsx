@@ -3,8 +3,8 @@ import { StyleSheet, View } from 'react-native';
 
 import { AnimatedCount } from '../../components/ui/AnimatedCount';
 import { AppText } from '../../components/ui/AppText';
-import { colors } from '../../theme/colors';
 import { radius, spacing } from '../../theme/spacing';
+import { useColors } from '../../theme/ThemeContext';
 import { formatLongDate, greeting } from '../../utils/frDate';
 
 type HomeHeaderProps = {
@@ -12,6 +12,7 @@ type HomeHeaderProps = {
 };
 
 function HomeHeaderBase({ totalTodayMs }: HomeHeaderProps) {
+  const colors = useColors();
   return (
     <View style={styles.row}>
       <View style={styles.left}>
@@ -23,7 +24,9 @@ function HomeHeaderBase({ totalTodayMs }: HomeHeaderProps) {
         </AppText>
       </View>
 
-      <View style={styles.chip}>
+      <View
+        style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.hairline }]}
+      >
         <AppText variant="caption" color="tertiary">
           Aujourd’hui
         </AppText>
@@ -45,10 +48,8 @@ const styles = StyleSheet.create({
   chip: {
     alignItems: 'flex-end',
     gap: spacing.xxs,
-    backgroundColor: colors.surface,
     borderRadius: radius.md,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.hairline,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
   },

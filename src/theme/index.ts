@@ -1,28 +1,24 @@
-import { colors } from './colors';
-import { shadows } from './shadows';
+import { type Colors } from './colors';
+import { type ShadowKey, useShadows } from './shadows';
 import { radius, spacing } from './spacing';
 import { typography } from './typography';
+import { useColors } from './ThemeContext';
 
-export const theme = {
-  colors,
-  spacing,
-  radius,
-  typography,
-  shadows,
-} as const;
-
-export type Theme = typeof theme;
+export type Theme = {
+  colors: Colors;
+  spacing: typeof spacing;
+  radius: typeof radius;
+  typography: typeof typography;
+  shadows: Record<ShadowKey, object>;
+};
 
 export * from './colors';
 export * from './spacing';
 export * from './typography';
 export * from './shadows';
+export * from './ThemeContext';
 
-/**
- * A hook indirection so the codebase never imports the raw `theme` object
- * directly in components. This keeps the door open for a light theme or a
- * runtime ThemeProvider later without touching call sites.
- */
+/** Live theme snapshot: colors and shadows resolve to the active scheme. */
 export function useTheme(): Theme {
-  return theme;
+  return { colors: useColors(), spacing, radius, typography, shadows: useShadows() };
 }

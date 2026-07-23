@@ -4,9 +4,9 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { AnimatedCount } from '../../components/ui/AnimatedCount';
 import { AppText } from '../../components/ui/AppText';
-import { colors } from '../../theme/colors';
 import { motion } from '../../theme/motion';
 import { radius, spacing } from '../../theme/spacing';
+import { useColors } from '../../theme/ThemeContext';
 
 type StatTileProps = {
   label: string;
@@ -18,13 +18,14 @@ type StatTileProps = {
 };
 
 /** Compact KPI tile — the value counts up; the tile itself never moves. */
-function StatTileBase({ label, value, kind, hint, accent = colors.accent, index = 0 }: StatTileProps) {
+function StatTileBase({ label, value, kind, hint, accent, index = 0 }: StatTileProps) {
+  const colors = useColors();
   return (
     <Animated.View
       entering={FadeInDown.delay(index * 55).duration(motion.duration.reveal)}
-      style={styles.tile}
+      style={[styles.tile, { backgroundColor: colors.surface, borderColor: colors.hairline }]}
     >
-      <View style={[styles.bar, { backgroundColor: accent }]} />
+      <View style={[styles.bar, { backgroundColor: accent ?? colors.accent }]} />
       <AppText variant="overline" color="tertiary">
         {label}
       </AppText>
@@ -41,10 +42,8 @@ function StatTileBase({ label, value, kind, hint, accent = colors.accent, index 
 const styles = StyleSheet.create({
   tile: {
     flex: 1,
-    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.hairline,
     padding: spacing.lg,
     gap: spacing.xxs,
     overflow: 'hidden',

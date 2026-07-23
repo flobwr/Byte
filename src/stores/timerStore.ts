@@ -3,11 +3,27 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { type CategoryId } from '../constants/categories';
 import { zustandStorage } from '../services/storage';
+import { useSettingsStore } from './settingsStore';
+import { parseDayKey } from '../utils/dateRange';
 import { dayKey } from '../utils/time';
 
-/** ms tracked per category, for a single calendar day. */
+/** One completed, attributed segment of tracked time. */
+export type LogEntry = {
+  id: string;
+  category: CategoryId;
+  startedAt: number;
+  endedAt: number;
+  ms: number;
+};
+
+export type DayLog = {
+  entries: LogEntry[];
+  note: string;
+};
+
+/** ms tracked per category, for a single calendar day — derived from entries. */
 export type DayTotals = Partial<Record<CategoryId, number>>;
-export type History = Record<string, DayTotals>;
+export type History = Record<string, DayLog>;
 
 export type TimerStatus = 'idle' | 'running' | 'paused';
 
@@ -19,6 +35,8 @@ type PersistedState = {
   pausedElapsed: number;
   status: TimerStatus;
   lastCategory: CategoryId | null;
+  /** Wall-clock start of the current running/paused segment (for history timestamps). */
+  segmentStartedAt: number | null;
   history: History;
 };
 
@@ -30,6 +48,13 @@ type Actions = {
   resume: () => void;
   endDay: () => void;
   resetAll: () => void;
+  /** Remove the most recently logged entry (today) and fold its time back into the live segment. */
+  undoLast: () => void;
+  /** Reassign a logged entry to a different activity — totals recompute automatically. */
+  editEntry: (dayKey: string, entryId: string, newCategory: CategoryId) => void;
+  /** Remove a single logged entry entirely. */
+  deleteEntry: (dayKey: string, entryId: string) => void;
+  setNote: (dayKey: string, note: string) => void;
 };
 
 export type TimerState = PersistedState & Actions;
@@ -40,6 +65,8 @@ export type TimerState = PersistedState & Actions;
  * on every render and loops forever ("Maximum update depth exceeded").
  */
 const EMPTY_TOTALS: DayTotals = Object.freeze({});
+const EMPTY_ENTRIES: readonly LogEntry[] = Object.freeze([]);
+const EMPTY_DAY: DayLog = Object.freeze({ entries: EMPTY_ENTRIES as LogEntry[], note: '' });
 
 const initial: PersistedState = {
   dayStartedAt: null,
@@ -47,6 +74,7 @@ const initial: PersistedState = {
   pausedElapsed: 0,
   status: 'idle',
   lastCategory: null,
+  segmentStartedAt: null,
   history: {},
 };
 
@@ -57,6 +85,22 @@ export function elapsedFrom(state: PersistedState, now: number): number {
   }
   if (state.status === 'paused') return state.pausedElapsed;
   return 0;
+}
+
+/** Today's key, honouring the user's configured day-start hour. */
+function todayKey(): string {
+  return dayKey(new Date(), useSettingsStore.getState().dayStartHour);
+}
+
+function makeEntryId(): string {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export function entriesToTotals(entries: readonly LogEntry[]): DayTotals {
+  if (entries.length === 0) return EMPTY_TOTALS;
+  const totals: DayTotals = {};
+  for (const e of entries) totals[e.category] = (totals[e.category] ?? 0) + e.ms;
+  return totals;
 }
 
 export const useTimerStore = create<TimerState>()(
@@ -71,6 +115,7 @@ export const useTimerStore = create<TimerState>()(
           sessionAnchor: now,
           pausedElapsed: 0,
           status: 'running',
+          segmentStartedAt: now,
         });
       },
 
@@ -80,19 +125,28 @@ export const useTimerStore = create<TimerState>()(
         if (state.status === 'idle' || state.dayStartedAt == null) return 0;
 
         const added = elapsedFrom(state, now);
-        const key = dayKey(new Date(now));
-        const day = state.history[key] ?? {};
-        const next: History = {
-          ...state.history,
-          [key]: { ...day, [id]: (day[id] ?? 0) + added },
-        };
+        const key = todayKey();
+        const day = state.history[key] ?? EMPTY_DAY;
+
+        let history = state.history;
+        if (added > 0) {
+          const entry: LogEntry = {
+            id: makeEntryId(),
+            category: id,
+            startedAt: state.segmentStartedAt ?? now,
+            endedAt: now,
+            ms: added,
+          };
+          history = { ...state.history, [key]: { ...day, entries: [...day.entries, entry] } };
+        }
 
         set({
-          history: next,
+          history,
           sessionAnchor: now,
           pausedElapsed: 0,
           status: 'running',
           lastCategory: id,
+          segmentStartedAt: now,
         });
         return added;
       },
@@ -121,14 +175,64 @@ export const useTimerStore = create<TimerState>()(
           pausedElapsed: 0,
           status: 'idle',
           lastCategory: null,
+          segmentStartedAt: null,
         });
       },
 
       resetAll: () => set({ ...initial }),
+
+      undoLast: () => {
+        const state = get();
+        const key = todayKey();
+        const day = state.history[key];
+        if (!day || day.entries.length === 0) return;
+
+        const last = day.entries[day.entries.length - 1]!;
+        const entries = day.entries.slice(0, -1);
+        const history: History = { ...state.history, [key]: { ...day, entries } };
+
+        if (state.status === 'idle') {
+          set({ history });
+          return;
+        }
+
+        const now = Date.now();
+        const restoredElapsed = elapsedFrom(state, now) + last.ms;
+        set({
+          history,
+          status: 'running',
+          sessionAnchor: now - restoredElapsed,
+          pausedElapsed: 0,
+          segmentStartedAt: last.startedAt,
+          lastCategory: entries.length > 0 ? entries[entries.length - 1]!.category : null,
+        });
+      },
+
+      editEntry: (key, entryId, newCategory) => {
+        const state = get();
+        const day = state.history[key];
+        if (!day) return;
+        const entries = day.entries.map((e) => (e.id === entryId ? { ...e, category: newCategory } : e));
+        set({ history: { ...state.history, [key]: { ...day, entries } } });
+      },
+
+      deleteEntry: (key, entryId) => {
+        const state = get();
+        const day = state.history[key];
+        if (!day) return;
+        const entries = day.entries.filter((e) => e.id !== entryId);
+        set({ history: { ...state.history, [key]: { ...day, entries } } });
+      },
+
+      setNote: (key, note) => {
+        const state = get();
+        const day = state.history[key] ?? EMPTY_DAY;
+        set({ history: { ...state.history, [key]: { ...day, note } } });
+      },
     }),
     {
       name: 'byte.timer',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => zustandStorage),
       partialize: (s): PersistedState => ({
         dayStartedAt: s.dayStartedAt,
@@ -136,14 +240,38 @@ export const useTimerStore = create<TimerState>()(
         pausedElapsed: s.pausedElapsed,
         status: s.status,
         lastCategory: s.lastCategory,
+        segmentStartedAt: s.segmentStartedAt,
         history: s.history,
       }),
+      // v1 stored `history[day]` as a flat { [category]: ms } map. v2 stores a
+      // chronological entry log instead, so undo/edit/notes have something to
+      // operate on. Old totals become one synthetic entry per category, dated
+      // to that calendar day — the granular timestamps are lost, but no time is.
+      migrate: (persisted, version) => {
+        const p = persisted as { history?: Record<string, unknown>; sessionAnchor?: number | null };
+        if (version < 2 && p.history) {
+          const migrated: History = {};
+          for (const [key, value] of Object.entries(p.history)) {
+            const totals = value as DayTotals;
+            const nominal = parseDayKey(key).getTime();
+            const entries: LogEntry[] = Object.entries(totals)
+              .filter(([, ms]) => (ms ?? 0) > 0)
+              .map(([category, ms]) => ({
+                id: `migrated-${key}-${category}`,
+                category: category as CategoryId,
+                startedAt: nominal,
+                endedAt: nominal,
+                ms: ms as number,
+              }));
+            migrated[key] = { entries, note: '' };
+          }
+          p.history = migrated;
+        }
+        return p as PersistedState;
+      },
     },
   ),
 );
-
-/** Selector helpers (kept outside the store to avoid re-render churn). */
-export const selectTodayTotals = (s: TimerState): DayTotals => s.history[dayKey()] ?? EMPTY_TOTALS;
 
 export const sumTotals = (totals: DayTotals): number =>
   Object.values(totals).reduce<number>((acc, v) => acc + (v ?? 0), 0);

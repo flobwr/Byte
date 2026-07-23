@@ -1,6 +1,8 @@
 import { Platform, type ViewStyle } from 'react-native';
 
-/** Discreet elevation. Shadows stay soft and low-contrast on dark surfaces. */
+import { useResolvedScheme } from './ThemeContext';
+
+/** Discreet elevation. Shadows stay soft and low-contrast on both surfaces. */
 const make = (elevation: number, opacity: number, radius: number, y: number): ViewStyle =>
   Platform.select({
     ios: {
@@ -13,7 +15,7 @@ const make = (elevation: number, opacity: number, radius: number, y: number): Vi
     default: {},
   }) as ViewStyle;
 
-export const shadows = {
+const darkShadows = {
   none: {} as ViewStyle,
   sm: make(2, 0.25, 8, 3),
   md: make(6, 0.35, 18, 8),
@@ -27,4 +29,28 @@ export const shadows = {
   } as ViewStyle,
 } as const;
 
-export type ShadowKey = keyof typeof shadows;
+// Lighter surfaces need noticeably softer, lower-contrast shadows or they
+// read as heavy smudges instead of a gentle lift.
+const lightShadows = {
+  none: {} as ViewStyle,
+  sm: make(2, 0.06, 8, 2),
+  md: make(4, 0.08, 16, 6),
+  lg: make(8, 0.1, 26, 12),
+  glow: {
+    shadowColor: '#5C6BD6',
+    shadowOpacity: 0.22,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 6,
+  } as ViewStyle,
+} as const;
+
+export type ShadowKey = keyof typeof darkShadows;
+/** Static default, dark-themed — for the few call sites outside React render. */
+export const shadows = darkShadows;
+
+/** Theme-aware shadow table. Reads the resolved scheme, re-renders on theme change. */
+export function useShadows(): typeof darkShadows {
+  const scheme = useResolvedScheme();
+  return scheme === 'light' ? lightShadows : darkShadows;
+}

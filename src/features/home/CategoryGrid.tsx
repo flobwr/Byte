@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { type Category, type CategoryId, DEFAULT_CATEGORIES } from '../../constants/categories';
+import { useSettingsStore } from '../../stores/settingsStore';
 import { type DayTotals } from '../../stores/timerStore';
 import { spacing } from '../../theme/spacing';
 import { CategoryCard } from './CategoryCard';
@@ -15,6 +16,7 @@ type CategoryGridProps = {
 
 /** 2-column grid of activity cards with a staggered entrance. */
 function CategoryGridBase({ totals, disabled, onLog }: CategoryGridProps) {
+  const goals = useSettingsStore((s) => s.goals);
   const rows: Category[][] = [];
   for (let i = 0; i < DEFAULT_CATEGORIES.length; i += 2) {
     rows.push(DEFAULT_CATEGORIES.slice(i, i + 2));
@@ -35,6 +37,7 @@ function CategoryGridBase({ totals, disabled, onLog }: CategoryGridProps) {
                 <CategoryCard
                   category={cat}
                   totalMs={totals[cat.id] ?? 0}
+                  goalMs={goals[cat.id]}
                   disabled={disabled}
                   onLog={onLog}
                 />

@@ -6,8 +6,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { colors } from '../../theme/colors';
 import { motion } from '../../theme/motion';
+import { useColors } from '../../theme/ThemeContext';
 import { typography, type TypographyVariant } from '../../theme/typography';
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
@@ -47,9 +47,11 @@ function AnimatedCountBase({
   value,
   kind,
   variant = 'title2',
-  color = colors.textPrimary,
+  color,
   style,
 }: AnimatedCountProps) {
+  const colors = useColors();
+  const resolvedColor = color ?? colors.textPrimary;
   const sv = useSharedValue(value);
 
   useEffect(() => {
@@ -76,7 +78,7 @@ function AnimatedCountBase({
       style={[
         styles.base,
         typography[variant],
-        { color, fontVariant: ['tabular-nums'] },
+        { color: resolvedColor, fontVariant: ['tabular-nums'] },
         style,
       ]}
       accessible

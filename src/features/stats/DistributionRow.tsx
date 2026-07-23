@@ -5,8 +5,9 @@ import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming, Easi
 import { Mascot } from '../../components/Mascot';
 import { AppText } from '../../components/ui/AppText';
 import { type Category } from '../../constants/categories';
-import { categoryColors, colors } from '../../theme/colors';
+import { categoryColors } from '../../theme/colors';
 import { radius, spacing } from '../../theme/spacing';
+import { useColors } from '../../theme/ThemeContext';
 import { formatDuration } from '../../utils/time';
 
 type DistributionRowProps = {
@@ -18,6 +19,7 @@ type DistributionRowProps = {
 
 /** One activity row with an animated proportion bar. */
 export function DistributionRow({ category, ms, fraction, index }: DistributionRowProps) {
+  const colors = useColors();
   const accent = categoryColors[category.color];
   const grow = useSharedValue(0);
 
@@ -42,7 +44,7 @@ export function DistributionRow({ category, ms, fraction, index }: DistributionR
             {formatDuration(ms)}
           </AppText>
         </View>
-        <View style={styles.track}>
+        <View style={[styles.track, { backgroundColor: colors.fillSoft }]}>
           <Animated.View style={[styles.fill, { backgroundColor: accent }, barStyle]} />
         </View>
       </View>
@@ -65,7 +67,6 @@ const styles = StyleSheet.create({
   track: {
     height: 8,
     borderRadius: radius.pill,
-    backgroundColor: colors.fillSoft,
     overflow: 'hidden',
   },
   fill: { height: '100%', borderRadius: radius.pill },

@@ -1,11 +1,14 @@
 /**
- * Byte color system — dark-first, sober and premium.
- * Inspired by Linear / Arc / Nothing: near-black canvas, quiet surfaces,
- * a single confident accent, and restrained category hues.
+ * Byte color system — dark-first, sober and premium, with a genuine light
+ * theme that keeps the same personality (warm ink instead of pure black,
+ * the same brand accent, the same restrained category hues) rather than a
+ * flat inversion.
+ * Inspired by Linear / Arc / Nothing: quiet canvas, quiet surfaces, a single
+ * confident accent.
  */
 
 export const palette = {
-  // Neutral canvas
+  // Neutral canvas — dark
   black: '#0A0A0B',
   ink900: '#0E0E10',
   ink800: '#141416',
@@ -20,6 +23,15 @@ export const palette = {
   fog400: '#6B6B73',
   fog500: '#48484E',
 
+  // Neutral canvas — light (warm paper, not clinical white)
+  paper000: '#FFFFFF',
+  paper050: '#FBFAF7',
+  paper100: '#F5F3EE',
+  paper200: '#ECE9E2',
+  ink050: '#17171A',
+  ink100: '#4B4A50',
+  ink200: '#84838A',
+
   // Brand accent — a calm periwinkle drawn from the mascot's blue-grey coat.
   accent: '#7C8CF8',
   accentSoft: '#5C6BD6',
@@ -31,10 +43,12 @@ export const palette = {
 
   // Semantic
   positive: '#5FD08A',
+  positiveDeep: '#2FA968',
   danger: '#FF6B6B',
+  dangerDeep: '#D8483F',
 } as const;
 
-/** Category accent hues — muted, distinct, never neon. */
+/** Category accent hues — muted, distinct, never neon. Shared across themes. */
 export const categoryColors = {
   indigo: '#7C8CF8',
   violet: '#B08CF8',
@@ -50,7 +64,30 @@ export const categoryColors = {
 
 export type CategoryColorKey = keyof typeof categoryColors;
 
-export const colors = {
+export type Colors = {
+  bg: string;
+  bgElevated: string;
+  surface: string;
+  surfaceElevated: string;
+  surfaceHigh: string;
+  hairline: string;
+  hairlineStrong: string;
+  textPrimary: string;
+  textSecondary: string;
+  textTertiary: string;
+  textOnAccent: string;
+  accent: string;
+  accentSoft: string;
+  amber: string;
+  positive: string;
+  danger: string;
+  fillFaint: string;
+  fillSoft: string;
+  fillMedium: string;
+  scrim: string;
+};
+
+export const darkColors: Colors = {
   bg: palette.black,
   bgElevated: palette.ink900,
   surface: palette.ink800,
@@ -77,6 +114,40 @@ export const colors = {
   fillSoft: 'rgba(255,255,255,0.06)',
   fillMedium: 'rgba(255,255,255,0.10)',
   scrim: 'rgba(0,0,0,0.6)',
-} as const;
+};
 
-export type Colors = typeof colors;
+/**
+ * A true light theme, not an inverted dark one: warm paper canvas, ink-toned
+ * text, and deepened brand hues so accent/amber/danger keep enough contrast
+ * on bright surfaces while staying recognisably "Byte".
+ */
+export const lightColors: Colors = {
+  bg: palette.paper100,
+  bgElevated: palette.paper050,
+  surface: palette.paper000,
+  surfaceElevated: palette.paper000,
+  surfaceHigh: palette.paper200,
+
+  hairline: 'rgba(23,23,20,0.08)',
+  hairlineStrong: 'rgba(23,23,20,0.14)',
+
+  textPrimary: palette.ink050,
+  textSecondary: palette.ink100,
+  textTertiary: palette.ink200,
+  textOnAccent: palette.white,
+
+  accent: palette.accentSoft,
+  accentSoft: palette.accentDeep,
+  amber: palette.amberDeep,
+
+  positive: palette.positiveDeep,
+  danger: palette.dangerDeep,
+
+  fillFaint: 'rgba(23,23,20,0.035)',
+  fillSoft: 'rgba(23,23,20,0.055)',
+  fillMedium: 'rgba(23,23,20,0.09)',
+  scrim: 'rgba(15,15,14,0.4)',
+};
+
+/** Static default — kept for the handful of theme-agnostic modules (e.g. icons in a fixed context). */
+export const colors = darkColors;

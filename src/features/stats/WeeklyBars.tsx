@@ -10,8 +10,8 @@ import Animated, {
 
 import { AppText } from '../../components/ui/AppText';
 import { type WeekBar } from './useStats';
-import { colors } from '../../theme/colors';
 import { radius, spacing } from '../../theme/spacing';
+import { useColors } from '../../theme/ThemeContext';
 import { formatDurationCompact } from '../../utils/time';
 
 const TRACK_HEIGHT = 128;
@@ -23,6 +23,7 @@ type WeeklyBarsProps = {
 };
 
 function Bar({ bar, max, accent, index }: { bar: WeekBar; max: number; accent: string; index: number }) {
+  const colors = useColors();
   const grow = useSharedValue(0);
   const target = Math.max(bar.ms > 0 ? 0.06 : 0, bar.ms / max);
 
@@ -61,11 +62,12 @@ function Bar({ bar, max, accent, index }: { bar: WeekBar; max: number; accent: s
   );
 }
 
-function WeeklyBarsBase({ bars, max, accent = colors.accent }: WeeklyBarsProps) {
+function WeeklyBarsBase({ bars, max, accent }: WeeklyBarsProps) {
+  const colors = useColors();
   return (
     <View style={styles.row}>
       {bars.map((bar, i) => (
-        <Bar key={i} bar={bar} max={max} accent={accent} index={i} />
+        <Bar key={i} bar={bar} max={max} accent={accent ?? colors.accent} index={i} />
       ))}
     </View>
   );

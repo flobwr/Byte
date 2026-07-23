@@ -11,13 +11,14 @@ import { RingProgress } from '../../features/stats/RingProgress';
 import { StatTile } from '../../features/stats/StatTile';
 import { useStats } from '../../features/stats/useStats';
 import { WeeklyBars } from '../../features/stats/WeeklyBars';
-import { colors } from '../../theme/colors';
 import { motion } from '../../theme/motion';
 import { spacing } from '../../theme/spacing';
+import { useColors } from '../../theme/ThemeContext';
 import { formatDuration } from '../../utils/time';
 
 export default function StatsScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
   const s = useStats();
 
   const scoreAccent =

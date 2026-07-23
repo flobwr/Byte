@@ -11,8 +11,8 @@ import Svg, { Circle } from 'react-native-svg';
 
 import { AnimatedCount } from '../../components/ui/AnimatedCount';
 import { AppText } from '../../components/ui/AppText';
-import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
+import { useColors } from '../../theme/ThemeContext';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -31,8 +31,10 @@ function RingProgressBase({
   label,
   size = 132,
   stroke = 12,
-  accent = colors.accent,
+  accent,
 }: RingProgressProps) {
+  const colors = useColors();
+  const resolvedAccent = accent ?? colors.accent;
   const r = (size - stroke) / 2;
   const circumference = 2 * Math.PI * r;
   const anim = useSharedValue(0);
@@ -66,7 +68,7 @@ function RingProgressBase({
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke={accent}
+          stroke={resolvedAccent}
           strokeWidth={stroke}
           fill="none"
           strokeLinecap="round"

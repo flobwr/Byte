@@ -12,8 +12,8 @@ import Animated, {
 import { Mascot } from '../../components/Mascot';
 import { AppText } from '../../components/ui/AppText';
 import { IDLE_MASCOT, RUNNING_MASCOT, type MascotKey } from '../../constants/mascots';
-import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
+import { useColors } from '../../theme/ThemeContext';
 import { formatClock } from '../../utils/time';
 
 type StopwatchProps = {
@@ -25,6 +25,7 @@ type StopwatchProps = {
 
 /** The hero: mascot inside a soft pulsing halo, with the live stopwatch face. */
 export function Stopwatch({ elapsedMs, status, mascot, accent }: StopwatchProps) {
+  const colors = useColors();
   const running = status === 'running';
   const pulse = useSharedValue(0);
   const beat = useSharedValue(0);
@@ -72,7 +73,12 @@ export function Stopwatch({ elapsedMs, status, mascot, accent }: StopwatchProps)
 
       <View style={styles.timeRow}>
         <Animated.View style={[styles.beat, { backgroundColor: accent }, dotStyle]} />
-        <AppText variant="title1" tabular style={styles.time} accessibilityLabel="Temps écoulé">
+        <AppText
+          variant="title1"
+          tabular
+          style={[styles.time, { color: colors.textPrimary }]}
+          accessibilityLabel="Temps écoulé"
+        >
           {formatClock(elapsedMs)}
         </AppText>
       </View>
@@ -110,7 +116,6 @@ const styles = StyleSheet.create({
     fontSize: 76,
     lineHeight: 82,
     fontWeight: '800',
-    color: colors.textPrimary,
     letterSpacing: 1.5,
   },
   caption: { marginTop: spacing.sm, letterSpacing: 2 },

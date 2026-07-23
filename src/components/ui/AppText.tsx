@@ -1,20 +1,10 @@
 import { memo } from 'react';
 import { Text, type TextProps, type TextStyle } from 'react-native';
 
-import { colors } from '../../theme/colors';
+import { useColors } from '../../theme/ThemeContext';
 import { typography, type TypographyVariant } from '../../theme/typography';
 
-type ColorToken = keyof typeof colorMap;
-
-const colorMap = {
-  primary: colors.textPrimary,
-  secondary: colors.textSecondary,
-  tertiary: colors.textTertiary,
-  accent: colors.accent,
-  amber: colors.amber,
-  positive: colors.positive,
-  danger: colors.danger,
-} as const;
+type ColorToken = 'primary' | 'secondary' | 'tertiary' | 'accent' | 'amber' | 'positive' | 'danger';
 
 export type AppTextProps = TextProps & {
   variant?: TypographyVariant;
@@ -34,6 +24,16 @@ function AppTextBase({
   style,
   ...rest
 }: AppTextProps) {
+  const colors = useColors();
+  const colorMap: Record<ColorToken, string> = {
+    primary: colors.textPrimary,
+    secondary: colors.textSecondary,
+    tertiary: colors.textTertiary,
+    accent: colors.accent,
+    amber: colors.amber,
+    positive: colors.positive,
+    danger: colors.danger,
+  };
   const resolved = (colorMap as Record<string, string>)[color] ?? color;
   return (
     <Text

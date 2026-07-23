@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 
 import { type Category, type CategoryId, DEFAULT_CATEGORIES } from '../../constants/categories';
 import { useMetaStore } from '../../stores/metaStore';
-import { type DayTotals, type History, useTimerStore } from '../../stores/timerStore';
+import { useSettingsStore } from '../../stores/settingsStore';
+import { type DayTotals, entriesToTotals, type History, useTimerStore } from '../../stores/timerStore';
 import { currentWeekKeys, isSameMonth, WEEKDAY_INITIALS } from '../../utils/dateRange';
 import { dayKey } from '../../utils/time';
 
@@ -11,6 +12,28 @@ export type WeekBar = { label: string; ms: number; isToday: boolean };
 
 /** Categories that count as "focused" time for the day score. */
 const FOCUS: readonly CategoryId[] = ['work', 'study', 'read', 'sport'];
+
+export function scoreBand(score: number): string {
+  if (score === 0) return '—';
+  if (score >= 75) return 'Excellent';
+  if (score >= 50) return 'Bonne journée';
+  if (score >= 25) return 'Correct';
+  return 'À équilibrer';
+}
+
+/** 0..100 — the share of a day's tracked time spent on "focused" activities. */
+export function scoreForTotals(totals: DayTotals): number {
+  const total = Object.values(totals).reduce<number>((a, v) => a + (v ?? 0), 0);
+  if (total <= 0) return 0;
+  const focusMs = FOCUS.reduce<number>((a, cid) => a + (totals[cid] ?? 0), 0);
+  return Math.round((focusMs / total) * 100);
+}
+
+export function rankCategories(source: Partial<Record<CategoryId, number>>): CategoryTotal[] {
+  return DEFAULT_CATEGORIES.map((category) => ({ category, ms: source[category.id] ?? 0 }))
+    .filter((r) => r.ms > 0)
+    .sort((a, b) => b.ms - a.ms);
+}
 
 export type Stats = {
   today: number;
@@ -32,16 +55,11 @@ export type Stats = {
 const sumDay = (d: DayTotals): number =>
   Object.values(d).reduce<number>((a, v) => a + (v ?? 0), 0);
 
-function scoreBand(score: number): string {
-  if (score === 0) return '—';
-  if (score >= 75) return 'Excellent';
-  if (score >= 50) return 'Bonne journée';
-  if (score >= 25) return 'Correct';
-  return 'À équilibrer';
-}
+const dayTotals = (history: History, key: string): DayTotals =>
+  entriesToTotals(history[key]?.entries ?? []);
 
-function compute(history: History, createdAt: number | null): Stats {
-  const todayKey = dayKey();
+function compute(history: History, createdAt: number | null, dayStartHour: number): Stats {
+  const todayKey = dayKey(new Date(), dayStartHour);
   const weekKeys = new Set(currentWeekKeys());
 
   let week = 0;
@@ -53,13 +71,13 @@ function compute(history: History, createdAt: number | null): Stats {
   const allByCat: Partial<Record<CategoryId, number>> = {};
 
   for (const key of Object.keys(history)) {
-    const day = history[key] ?? {};
-    const dayTotal = sumDay(day);
-    if (dayTotal <= 0) continue;
+    const day = dayTotals(history, key);
+    const total = sumDay(day);
+    if (total <= 0) continue;
     daysTracked += 1;
-    allTime += dayTotal;
-    if (weekKeys.has(key)) week += dayTotal;
-    if (isSameMonth(key)) month += dayTotal;
+    allTime += total;
+    if (weekKeys.has(key)) week += total;
+    if (isSameMonth(key)) month += total;
     for (const [cid, ms] of Object.entries(day) as [CategoryId, number][]) {
       if (ms > 0) {
         activityCount += 1;
@@ -68,23 +86,17 @@ function compute(history: History, createdAt: number | null): Stats {
     }
   }
 
-  const todayTotals = history[todayKey] ?? {};
-  const today = sumDay(todayTotals);
-
-  const rank = (source: Partial<Record<CategoryId, number>>): CategoryTotal[] =>
-    DEFAULT_CATEGORIES.map((category) => ({ category, ms: source[category.id] ?? 0 }))
-      .filter((r) => r.ms > 0)
-      .sort((a, b) => b.ms - a.ms);
+  const todayCategoryTotals = dayTotals(history, todayKey);
+  const today = sumDay(todayCategoryTotals);
 
   const weekBars: WeekBar[] = currentWeekKeys().map((key, i) => ({
     label: WEEKDAY_INITIALS[i] ?? '',
-    ms: sumDay(history[key] ?? {}),
+    ms: sumDay(dayTotals(history, key)),
     isToday: key === todayKey,
   }));
   const weekMax = Math.max(1, ...weekBars.map((b) => b.ms));
 
-  const focusMs = FOCUS.reduce<number>((a, cid) => a + (todayTotals[cid] ?? 0), 0);
-  const dayScore = today > 0 ? Math.round((focusMs / today) * 100) : 0;
+  const dayScore = scoreForTotals(todayCategoryTotals);
 
   return {
     today,
@@ -94,8 +106,8 @@ function compute(history: History, createdAt: number | null): Stats {
     activityCount,
     daysTracked,
     categoriesCount: DEFAULT_CATEGORIES.length,
-    todayByCategory: rank(todayTotals),
-    allTimeByCategory: rank(allByCat),
+    todayByCategory: rankCategories(todayCategoryTotals),
+    allTimeByCategory: rankCategories(allByCat),
     weekBars,
     weekMax,
     dayScore,
@@ -108,5 +120,6 @@ function compute(history: History, createdAt: number | null): Stats {
 export function useStats(): Stats {
   const history = useTimerStore((s) => s.history);
   const createdAt = useMetaStore((s) => s.createdAt);
-  return useMemo(() => compute(history, createdAt), [history, createdAt]);
+  const dayStartHour = useSettingsStore((s) => s.dayStartHour);
+  return useMemo(() => compute(history, createdAt, dayStartHour), [history, createdAt, dayStartHour]);
 }

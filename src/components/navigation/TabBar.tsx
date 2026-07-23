@@ -5,21 +5,24 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
-import { colors } from '../../theme/colors';
 import { motion } from '../../theme/motion';
 import { radius, spacing } from '../../theme/spacing';
-import { shadows } from '../../theme/shadows';
+import { useShadows } from '../../theme/shadows';
+import { useColors, useResolvedScheme } from '../../theme/ThemeContext';
 import { AppText } from '../ui/AppText';
 import { Icon, type IconName } from '../ui/Icon';
+import { type Colors } from '../../theme/colors';
 
 const ICONS: Record<string, IconName> = {
   index: 'home',
+  calendar: 'calendar',
   stats: 'stats',
   profile: 'profile',
 };
 
 const LABELS: Record<string, string> = {
   index: 'Aujourd’hui',
+  calendar: 'Calendrier',
   stats: 'Stats',
   profile: 'Profil',
 };
@@ -27,10 +30,24 @@ const LABELS: Record<string, string> = {
 /** Floating, blurred, pill-shaped tab bar — the app's signature chrome. */
 export function TabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
+  const shadows = useShadows();
+  const scheme = useResolvedScheme();
 
   return (
     <View pointerEvents="box-none" style={[styles.wrap, { paddingBottom: insets.bottom + spacing.sm }]}>
-      <BlurView intensity={40} tint="dark" style={styles.bar}>
+      <BlurView
+        intensity={40}
+        tint={scheme}
+        style={[
+          styles.bar,
+          shadows.lg,
+          {
+            borderColor: colors.hairlineStrong,
+            backgroundColor: scheme === 'light' ? 'rgba(255,255,255,0.72)' : 'rgba(20,20,22,0.6)',
+          },
+        ]}
+      >
         {state.routes.map((route, index) => {
           const focused = state.index === index;
           const onPress = () => {
@@ -45,6 +62,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
               icon={ICONS[route.name] ?? 'home'}
               label={LABELS[route.name] ?? route.name}
               onPress={onPress}
+              colors={colors}
             />
           );
         })}
@@ -58,11 +76,13 @@ function TabButton({
   icon,
   label,
   onPress,
+  colors,
 }: {
   focused: boolean;
   icon: IconName;
   label: string;
   onPress: () => void;
+  colors: Colors;
 }) {
   const pressed = useSharedValue(0);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -82,7 +102,9 @@ function TabButton({
       accessibilityState={{ selected: focused }}
       accessibilityLabel={label}
     >
-      <Animated.View style={[styles.tabInner, focused && styles.tabActive, animatedStyle]}>
+      <Animated.View
+        style={[styles.tabInner, focused && { backgroundColor: colors.fillMedium }, animatedStyle]}
+      >
         <Icon name={icon} size={22} color={focused ? colors.textPrimary : colors.textTertiary} />
         {focused && (
           <AppText variant="caption" color="primary" style={styles.label}>
@@ -110,10 +132,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: radius.pill,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.hairlineStrong,
     overflow: 'hidden',
-    backgroundColor: 'rgba(20,20,22,0.6)',
-    ...shadows.lg,
   },
   tab: { borderRadius: radius.pill },
   tabInner: {
@@ -125,9 +144,6 @@ const styles = StyleSheet.create({
     minWidth: 52,
     justifyContent: 'center',
     borderRadius: radius.pill,
-  },
-  tabActive: {
-    backgroundColor: colors.fillMedium,
   },
   label: { marginRight: spacing.xxs },
 });

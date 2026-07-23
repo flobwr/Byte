@@ -8,9 +8,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { colors } from '../../theme/colors';
 import { motion } from '../../theme/motion';
 import { radius, spacing } from '../../theme/spacing';
+import { useColors } from '../../theme/ThemeContext';
 import { AppText } from './AppText';
 import { Icon, type IconName } from './Icon';
 
@@ -32,11 +32,13 @@ function ButtonBase({
   onPress,
   variant = 'primary',
   icon,
-  accent = colors.accent,
+  accent,
   fullWidth,
   haptic = Haptics.ImpactFeedbackStyle.Light,
   style,
 }: ButtonProps) {
+  const colors = useColors();
+  const resolvedAccent = accent ?? colors.accent;
   const pressed = useSharedValue(0);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: 1 - pressed.value * (1 - motion.press.scale) }],
@@ -49,7 +51,7 @@ function ButtonBase({
 
   const bg: ViewStyle =
     variant === 'primary'
-      ? { backgroundColor: accent, shadowColor: accent, ...primaryShadow }
+      ? { backgroundColor: resolvedAccent, shadowColor: resolvedAccent, ...primaryShadow }
       : variant === 'secondary'
         ? { backgroundColor: colors.surfaceElevated, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairlineStrong }
         : { backgroundColor: 'transparent' };

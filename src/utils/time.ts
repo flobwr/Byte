@@ -4,11 +4,18 @@ export const SECOND = 1000;
 export const MINUTE = 60 * SECOND;
 export const HOUR = 60 * MINUTE;
 
-/** Local calendar day key, e.g. "2026-07-22". Used to bucket totals per day. */
-export function dayKey(date: Date = new Date()): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
+/**
+ * Local calendar day key, e.g. "2026-07-22". Used to bucket totals per day.
+ * `dayStartHour` lets a "day" begin at a custom hour (e.g. 4 = a day runs
+ * 4am→4am) instead of midnight — anything before that hour still counts as
+ * the previous calendar day.
+ */
+export function dayKey(date: Date = new Date(), dayStartHour = 0): string {
+  const shifted =
+    dayStartHour > 0 ? new Date(date.getTime() - dayStartHour * HOUR) : date;
+  const y = shifted.getFullYear();
+  const m = String(shifted.getMonth() + 1).padStart(2, '0');
+  const d = String(shifted.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
 

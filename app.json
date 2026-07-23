@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "byte",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "backgroundColor": "#0A0A0B",
     "splash": {
@@ -22,7 +22,7 @@
     },
     "android": {
       "package": "com.byte.app",
-      "userInterfaceStyle": "dark",
+      "userInterfaceStyle": "automatic",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0A0A0B"

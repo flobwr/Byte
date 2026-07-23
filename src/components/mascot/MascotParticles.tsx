@@ -10,7 +10,8 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { type MascotKey } from '../../constants/mascots';
-import { categoryColors, colors } from '../../theme/colors';
+import { categoryColors } from '../../theme/colors';
+import { useColors } from '../../theme/ThemeContext';
 import { AppText } from '../ui/AppText';
 
 export type ParticleKind =
@@ -68,6 +69,8 @@ type ParticleProps = {
 
 /** A single looping accessory element. Motion is fully worklet-driven (UI thread). */
 function Particle({ kind, x, y, size, delay, duration, index }: ParticleProps) {
+  const colors = useColors();
+  const mist = colors.textPrimary + '48';
   const t = useSharedValue(0);
 
   useEffect(() => {
@@ -168,7 +171,7 @@ function Particle({ kind, x, y, size, delay, duration, index }: ParticleProps) {
         pointerEvents="none"
         style={[
           styles.steam,
-          { left: x, top: y, width: Math.max(4, glyph * 0.42), height: glyph },
+          { left: x, top: y, width: Math.max(4, glyph * 0.42), height: glyph, backgroundColor: mist },
           style,
         ]}
       />
@@ -180,7 +183,11 @@ function Particle({ kind, x, y, size, delay, duration, index }: ParticleProps) {
     return (
       <Animated.View
         pointerEvents="none"
-        style={[styles.dot, { left: x, top: y, width: d, height: d, borderRadius: d / 2 }, style]}
+        style={[
+          styles.dot,
+          { left: x, top: y, width: d, height: d, borderRadius: d / 2, backgroundColor: mist },
+          style,
+        ]}
       />
     );
   }
@@ -190,7 +197,7 @@ function Particle({ kind, x, y, size, delay, duration, index }: ParticleProps) {
     return (
       <Animated.View
         pointerEvents="none"
-        style={[styles.sparkle, { left: x, top: y, width: d, height: d }, style]}
+        style={[styles.sparkle, { left: x, top: y, width: d, height: d, backgroundColor: colors.amber }, style]}
       />
     );
   }
@@ -210,7 +217,19 @@ function Particle({ kind, x, y, size, delay, duration, index }: ParticleProps) {
     return (
       <Animated.View
         pointerEvents="none"
-        style={[styles.bubble, { left: x, top: y, width: w, height: w * 0.64 }, style]}
+        style={[
+          styles.bubble,
+          {
+            left: x,
+            top: y,
+            width: w,
+            height: w * 0.64,
+            backgroundColor: colors.surfaceElevated,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairlineStrong,
+          },
+          style,
+        ]}
       >
         <View style={[styles.bubbleDot, { backgroundColor: colors.textSecondary }]} />
         <View style={[styles.bubbleDot, { backgroundColor: colors.textSecondary }]} />
@@ -261,17 +280,9 @@ function MascotParticlesBase({ name, size }: MascotParticlesProps) {
 
 const styles = StyleSheet.create({
   abs: { position: 'absolute' },
-  steam: {
-    position: 'absolute',
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.28)',
-  },
-  dot: { position: 'absolute', backgroundColor: 'rgba(255,255,255,0.5)' },
-  sparkle: {
-    position: 'absolute',
-    backgroundColor: colors.amber,
-    borderRadius: 1,
-  },
+  steam: { position: 'absolute', borderRadius: 6 },
+  dot: { position: 'absolute' },
+  sparkle: { position: 'absolute', borderRadius: 1 },
   sweat: {
     position: 'absolute',
     backgroundColor: categoryColors.sky,
@@ -282,7 +293,6 @@ const styles = StyleSheet.create({
   },
   bubble: {
     position: 'absolute',
-    backgroundColor: 'rgba(240,240,245,0.92)',
     borderRadius: 999,
     flexDirection: 'row',
     alignItems: 'center',

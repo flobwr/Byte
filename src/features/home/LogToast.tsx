@@ -6,7 +6,8 @@ import { Mascot } from '../../components/Mascot';
 import { AppText } from '../../components/ui/AppText';
 import { type MascotKey } from '../../constants/mascots';
 import { radius, spacing } from '../../theme/spacing';
-import { shadows } from '../../theme/shadows';
+import { useShadows } from '../../theme/shadows';
+import { useColors } from '../../theme/ThemeContext';
 import { formatDuration } from '../../utils/time';
 
 export type LogFeedback = {
@@ -19,6 +20,8 @@ export type LogFeedback = {
 
 /** Ephemeral confirmation that slides in on log and fades away — no dialog, no tap. */
 export function LogToast({ feedback }: { feedback: LogFeedback | null }) {
+  const colors = useColors();
+  const shadows = useShadows();
   const progress = useSharedValue(0);
 
   useEffect(() => {
@@ -39,7 +42,13 @@ export function LogToast({ feedback }: { feedback: LogFeedback | null }) {
 
   return (
     <Animated.View style={[styles.wrap, style]} pointerEvents="none">
-      <View style={[styles.toast, { borderColor: feedback.color + '55' }]}>
+      <View
+        style={[
+          styles.toast,
+          shadows.lg,
+          { backgroundColor: colors.surfaceElevated, borderColor: feedback.color + '55' },
+        ]}
+      >
         <View style={[styles.thumb, { backgroundColor: feedback.color + '22' }]}>
           <Mascot name={feedback.mascot} size={34} animated={false} />
         </View>
@@ -69,12 +78,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: 'rgba(28,28,31,0.96)',
     borderRadius: radius.pill,
     borderWidth: StyleSheet.hairlineWidth,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.lg,
-    ...shadows.lg,
   },
   thumb: {
     width: 40,

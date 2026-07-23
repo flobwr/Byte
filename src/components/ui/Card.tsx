@@ -1,9 +1,9 @@
 import { memo, type ReactNode } from 'react';
 import { StyleSheet, View, type ViewProps, type ViewStyle } from 'react-native';
 
-import { colors } from '../../theme/colors';
 import { radius, spacing } from '../../theme/spacing';
-import { shadows, type ShadowKey } from '../../theme/shadows';
+import { type ShadowKey, useShadows } from '../../theme/shadows';
+import { useColors } from '../../theme/ThemeContext';
 
 export type CardProps = ViewProps & {
   children?: ReactNode;
@@ -24,6 +24,8 @@ function CardBase({
   style,
   ...rest
 }: CardProps) {
+  const colors = useColors();
+  const shadows = useShadows();
   const bg =
     surface === 'transparent'
       ? 'transparent'
