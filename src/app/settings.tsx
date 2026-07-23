@@ -163,41 +163,43 @@ export default function SettingsScreen() {
 
         <Animated.View entering={FadeInDown.delay(60).duration(motion.duration.reveal)}>
           <SectionTitle>Journée</SectionTitle>
-          <Card padding="none" cornerRadius="xl" style={styles.card}>
+          <Card padding="lg" cornerRadius="xl" style={styles.card}>
+            <AppText variant="body">Début de journée</AppText>
+            <AppText variant="caption" color="tertiary" style={styles.hint}>
+              Une nouvelle journée commence à cette heure.
+            </AppText>
             <View style={styles.stepperRow}>
-              <View>
-                <AppText variant="body">Début de journée</AppText>
-                <AppText variant="caption" color="tertiary" style={styles.hint}>
-                  Une nouvelle journée commence à cette heure.
-                </AppText>
-              </View>
-              <View style={styles.stepperControls}>
-                <Pressable
-                  onPress={() => {
-                    Haptics.selectionAsync();
-                    setDayStartHour((dayStartHour + 23) % 24);
-                  }}
-                  style={[styles.stepBtn, { backgroundColor: colors.fillSoft }]}
-                  accessibilityRole="button"
-                  accessibilityLabel="Heure précédente"
-                >
-                  <Icon name="chevronLeft" size={16} color={colors.textPrimary} />
-                </Pressable>
-                <AppText variant="bodyStrong" tabular style={styles.stepperValue}>
-                  {dayStartLabel}
-                </AppText>
-                <Pressable
-                  onPress={() => {
-                    Haptics.selectionAsync();
-                    setDayStartHour((dayStartHour + 1) % 24);
-                  }}
-                  style={[styles.stepBtn, { backgroundColor: colors.fillSoft }]}
-                  accessibilityRole="button"
-                  accessibilityLabel="Heure suivante"
-                >
-                  <Icon name="chevronRight" size={16} color={colors.textPrimary} />
-                </Pressable>
-              </View>
+              <Pressable
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setDayStartHour((dayStartHour + 23) % 24);
+                }}
+                style={({ pressed }) => [
+                  styles.stepBtn,
+                  { backgroundColor: colors.fillSoft, opacity: pressed ? 0.7 : 1 },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Heure précédente"
+              >
+                <Icon name="chevronLeft" size={18} color={colors.textPrimary} />
+              </Pressable>
+              <AppText variant="title3" tabular style={styles.stepperValue}>
+                {dayStartLabel}
+              </AppText>
+              <Pressable
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setDayStartHour((dayStartHour + 1) % 24);
+                }}
+                style={({ pressed }) => [
+                  styles.stepBtn,
+                  { backgroundColor: colors.fillSoft, opacity: pressed ? 0.7 : 1 },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Heure suivante"
+              >
+                <Icon name="chevronRight" size={18} color={colors.textPrimary} />
+              </Pressable>
             </View>
           </Card>
         </Animated.View>
@@ -264,13 +266,11 @@ const styles = StyleSheet.create({
   stepperRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.xl,
+    justifyContent: 'center',
+    marginTop: spacing.lg,
     gap: spacing.md,
   },
-  hint: { marginTop: spacing.xxs, maxWidth: 200 },
-  stepperControls: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  hint: { marginTop: spacing.xxs },
   stepBtn: {
     width: 34,
     height: 34,
