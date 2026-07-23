@@ -5,12 +5,19 @@ import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
 import { Mascot } from '../../components/Mascot';
 import { AppText } from '../../components/ui/AppText';
 import { Icon } from '../../components/ui/Icon';
-import { CATEGORY_BY_ID, colorForCategory, DEFAULT_CATEGORIES, type CategoryId } from '../../constants/categories';
+import {
+  CATEGORY_BY_ID,
+  colorForCategory,
+  DEFAULT_CATEGORIES,
+  type CategoryId,
+} from '../../constants/categories';
 import { type LogEntry, useTimerStore } from '../../stores/timerStore';
 import { radius, spacing } from '../../theme/spacing';
 import { useShadows } from '../../theme/shadows';
 import { useColors } from '../../theme/ThemeContext';
 import { formatDuration } from '../../utils/time';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type EditEntrySheetProps = {
   entry: LogEntry | null;
@@ -51,19 +58,22 @@ export function EditEntrySheet({ entry, dayKey, onClose }: EditEntrySheetProps) 
   };
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable style={[styles.backdrop, { backgroundColor: colors.scrim }]} onPress={onClose}>
-        <Animated.View
-          entering={FadeIn.duration(180)}
-          exiting={FadeOut.duration(140)}
-          style={StyleSheet.absoluteFill}
-        />
-      </Pressable>
+    <Modal visible transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
+      <AnimatedPressable
+        entering={FadeIn.duration(200)}
+        exiting={FadeOut.duration(160)}
+        style={[styles.backdrop, { backgroundColor: colors.scrim }]}
+        onPress={onClose}
+      />
       <View pointerEvents="box-none" style={styles.wrap}>
         <Animated.View
           entering={FadeInDown.duration(260).springify().damping(18)}
           exiting={FadeOut.duration(160)}
-          style={[styles.sheet, shadows.lg, { backgroundColor: colors.surfaceElevated, borderColor: colors.hairlineStrong }]}
+          style={[
+            styles.sheet,
+            shadows.lg,
+            { backgroundColor: colors.surfaceElevated, borderColor: colors.hairlineStrong },
+          ]}
         >
           <View style={styles.handle} />
           <View style={styles.head}>
@@ -84,7 +94,10 @@ export function EditEntrySheet({ entry, dayKey, onClose }: EditEntrySheetProps) 
                     onPress={() => pick(cat.id)}
                     style={({ pressed }) => [
                       styles.option,
-                      { backgroundColor: active ? accent + '22' : colors.fillFaint, opacity: pressed ? 0.8 : 1 },
+                      {
+                        backgroundColor: active ? accent + '22' : colors.fillFaint,
+                        opacity: pressed ? 0.8 : 1,
+                      },
                     ]}
                     accessibilityRole="button"
                     accessibilityLabel={cat.label}

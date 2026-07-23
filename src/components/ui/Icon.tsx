@@ -46,7 +46,9 @@ function IconBase({ name, size = 24, color, strokeWidth = 2 }: IconProps) {
 
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-      {name === 'home' && <Path d="M3 10.8 12 3l9 7.8V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1Z" {...common} />}
+      {name === 'home' && (
+        <Path d="M3 10.8 12 3l9 7.8V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1Z" {...common} />
+      )}
       {name === 'stats' && (
         <>
           <Path d="M4 20V10" {...common} />
@@ -74,7 +76,9 @@ function IconBase({ name, size = 24, color, strokeWidth = 2 }: IconProps) {
           <Rect x={14} y={5} width={4} height={14} rx={1.4} fill={resolvedColor} stroke="none" />
         </>
       )}
-      {name === 'stop' && <Rect x={6} y={6} width={12} height={12} rx={3} fill={resolvedColor} stroke="none" />}
+      {name === 'stop' && (
+        <Rect x={6} y={6} width={12} height={12} rx={3} fill={resolvedColor} stroke="none" />
+      )}
       {name === 'plus' && (
         <>
           <Path d="M12 5v14" {...common} />
@@ -127,10 +131,15 @@ function IconBase({ name, size = 24, color, strokeWidth = 2 }: IconProps) {
       {name === 'sun' && (
         <>
           <Circle cx={12} cy={12} r={4.2} {...common} />
-          <Path d="M12 2.5v2.4M12 19.1v2.4M21.5 12h-2.4M4.9 12H2.5M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2 5.5 5.5" {...common} />
+          <Path
+            d="M12 2.5v2.4M12 19.1v2.4M21.5 12h-2.4M4.9 12H2.5M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2 5.5 5.5"
+            {...common}
+          />
         </>
       )}
-      {name === 'moon' && <Path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.5 6.5 0 0 0 10.2 10.2Z" {...common} />}
+      {name === 'moon' && (
+        <Path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.5 6.5 0 0 0 10.2 10.2Z" {...common} />
+      )}
     </Svg>
   );
 }

@@ -212,7 +212,9 @@ export const useTimerStore = create<TimerState>()(
         const state = get();
         const day = state.history[key];
         if (!day) return;
-        const entries = day.entries.map((e) => (e.id === entryId ? { ...e, category: newCategory } : e));
+        const entries = day.entries.map((e) =>
+          e.id === entryId ? { ...e, category: newCategory } : e,
+        );
         set({ history: { ...state.history, [key]: { ...day, entries } } });
       },
 

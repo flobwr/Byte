@@ -1,10 +1,6 @@
 import { memo, useEffect } from 'react';
 import { StyleSheet, TextInput, type TextStyle } from 'react-native';
-import Animated, {
-  useAnimatedProps,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { motion } from '../../theme/motion';
 import { useColors } from '../../theme/ThemeContext';
@@ -43,13 +39,7 @@ function fmtInt(n: number): string {
  * animated, non-editable TextInput) — the value counts up without ever
  * re-rendering or moving its container.
  */
-function AnimatedCountBase({
-  value,
-  kind,
-  variant = 'title2',
-  color,
-  style,
-}: AnimatedCountProps) {
+function AnimatedCountBase({ value, kind, variant = 'title2', color, style }: AnimatedCountProps) {
   const colors = useColors();
   const resolvedColor = color ?? colors.textPrimary;
   const sv = useSharedValue(value);

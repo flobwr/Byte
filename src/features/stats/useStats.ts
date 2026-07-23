@@ -3,7 +3,12 @@ import { useMemo } from 'react';
 import { type Category, type CategoryId, DEFAULT_CATEGORIES } from '../../constants/categories';
 import { useMetaStore } from '../../stores/metaStore';
 import { useSettingsStore } from '../../stores/settingsStore';
-import { type DayTotals, entriesToTotals, type History, useTimerStore } from '../../stores/timerStore';
+import {
+  type DayTotals,
+  entriesToTotals,
+  type History,
+  useTimerStore,
+} from '../../stores/timerStore';
 import { currentWeekKeys, isSameMonth, WEEKDAY_INITIALS } from '../../utils/dateRange';
 import { dayKey } from '../../utils/time';
 
@@ -52,8 +57,7 @@ export type Stats = {
   createdAt: number | null;
 };
 
-const sumDay = (d: DayTotals): number =>
-  Object.values(d).reduce<number>((a, v) => a + (v ?? 0), 0);
+const sumDay = (d: DayTotals): number => Object.values(d).reduce<number>((a, v) => a + (v ?? 0), 0);
 
 const dayTotals = (history: History, key: string): DayTotals =>
   entriesToTotals(history[key]?.entries ?? []);
@@ -121,5 +125,8 @@ export function useStats(): Stats {
   const history = useTimerStore((s) => s.history);
   const createdAt = useMetaStore((s) => s.createdAt);
   const dayStartHour = useSettingsStore((s) => s.dayStartHour);
-  return useMemo(() => compute(history, createdAt, dayStartHour), [history, createdAt, dayStartHour]);
+  return useMemo(
+    () => compute(history, createdAt, dayStartHour),
+    [history, createdAt, dayStartHour],
+  );
 }

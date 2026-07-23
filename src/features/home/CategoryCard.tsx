@@ -56,7 +56,10 @@ function CategoryCardBase({ category, totalMs, goalMs, disabled, onLog }: Catego
 
   const grow = useSharedValue(0);
   useEffect(() => {
-    grow.value = withTiming(fraction, { duration: motion.duration.value, easing: motion.easing.standard });
+    grow.value = withTiming(fraction, {
+      duration: motion.duration.value,
+      easing: motion.easing.standard,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fraction]);
 
@@ -118,13 +121,22 @@ function CategoryCardBase({ category, totalMs, goalMs, disabled, onLog }: Catego
               : '—'}
         </AppText>
 
-        {hasGoal && (
-          <View style={[styles.track, { backgroundColor: colors.fillSoft }]}>
+        {/* Space is always reserved (invisible when no goal) so sibling cards in a
+            row never end up at different heights depending on who has a goal set. */}
+        <View
+          style={[styles.track, { backgroundColor: hasGoal ? colors.fillSoft : 'transparent' }]}
+        >
+          {hasGoal && (
             <Animated.View
-              style={[styles.trackFill, { backgroundColor: reached ? colors.positive : accent }, barStyle, barScaleStyle]}
+              style={[
+                styles.trackFill,
+                { backgroundColor: reached ? colors.positive : accent },
+                barStyle,
+                barScaleStyle,
+              ]}
             />
-          </View>
-        )}
+          )}
+        </View>
       </Animated.View>
     </Pressable>
   );

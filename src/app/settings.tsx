@@ -57,7 +57,10 @@ function Row({
         disabled={!onPress}
         android_ripple={onPress ? { color: colors.fillSoft } : undefined}
         accessibilityRole={onPress ? 'button' : undefined}
-        style={({ pressed }) => [styles.rowItem, pressed && onPress ? { backgroundColor: colors.fillFaint } : null]}
+        style={({ pressed }) => [
+          styles.rowItem,
+          pressed && onPress ? { backgroundColor: colors.fillFaint } : null,
+        ]}
       >
         <AppText variant="body" color={danger ? 'danger' : 'primary'}>
           {label}
@@ -151,7 +154,11 @@ export default function SettingsScreen() {
                   accessibilityRole="button"
                   accessibilityState={{ selected: active }}
                 >
-                  <Icon name={opt.icon} size={20} color={active ? colors.accent : colors.textSecondary} />
+                  <Icon
+                    name={opt.icon}
+                    size={20}
+                    color={active ? colors.accent : colors.textSecondary}
+                  />
                   <AppText variant="callout" color={active ? 'accent' : 'secondary'}>
                     {opt.label}
                   </AppText>
@@ -213,7 +220,10 @@ export default function SettingsScreen() {
                   key={cat.id}
                   onPress={() => setEditingGoal(cat)}
                   android_ripple={{ color: colors.fillSoft }}
-                  style={({ pressed }) => [styles.goalRow, pressed && { backgroundColor: colors.fillFaint }]}
+                  style={({ pressed }) => [
+                    styles.goalRow,
+                    pressed && { backgroundColor: colors.fillFaint },
+                  ]}
                 >
                   <View style={styles.goalLeft}>
                     <View style={[styles.goalThumb, { backgroundColor: accent + '1F' }]}>
@@ -271,7 +281,13 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: spacing.md,
   },
-  close: { width: 32, height: 32, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  close: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   content: { paddingHorizontal: spacing.xl },
   sectionTitle: { marginTop: spacing.xl, marginBottom: spacing.md },
   card: { overflow: 'hidden' },
@@ -294,7 +310,13 @@ const styles = StyleSheet.create({
   },
   hint: { marginTop: spacing.xxs, maxWidth: 200 },
   stepperControls: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  stepBtn: { width: 34, height: 34, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  stepBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   stepperValue: { minWidth: 56, textAlign: 'center' },
   goalRow: {
     flexDirection: 'row',

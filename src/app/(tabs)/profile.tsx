@@ -49,12 +49,36 @@ export default function ProfileScreen() {
         </Animated.View>
 
         <View style={styles.tileRow}>
-          <StatTile label="Temps total" value={s.allTime} kind="duration" accent={colors.amber} index={2} />
-          <StatTile label="Activités" value={s.activityCount} kind="int" accent={colors.accent} index={3} />
+          <StatTile
+            label="Temps total"
+            value={s.allTime}
+            kind="duration"
+            accent={colors.amber}
+            index={2}
+          />
+          <StatTile
+            label="Activités"
+            value={s.activityCount}
+            kind="int"
+            accent={colors.accent}
+            index={3}
+          />
         </View>
         <View style={styles.tileRow}>
-          <StatTile label="Jours suivis" value={s.daysTracked} kind="int" accent={colors.positive} index={4} />
-          <StatTile label="Catégories" value={s.categoriesCount} kind="int" accent={colors.accentSoft} index={5} />
+          <StatTile
+            label="Jours suivis"
+            value={s.daysTracked}
+            kind="int"
+            accent={colors.positive}
+            index={4}
+          />
+          <StatTile
+            label="Catégories"
+            value={s.categoriesCount}
+            kind="int"
+            accent={colors.accentSoft}
+            index={5}
+          />
         </View>
 
         <Card padding="none" cornerRadius="xl" style={styles.list}>
@@ -63,7 +87,10 @@ export default function ProfileScreen() {
             android_ripple={{ color: colors.fillSoft }}
             accessibilityRole="button"
             accessibilityLabel="Paramètres"
-            style={({ pressed }) => [styles.rowItem, pressed && { backgroundColor: colors.fillFaint }]}
+            style={({ pressed }) => [
+              styles.rowItem,
+              pressed && { backgroundColor: colors.fillFaint },
+            ]}
           >
             <View style={styles.rowLeft}>
               <Icon name="settings" size={19} color={colors.textPrimary} />

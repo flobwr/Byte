@@ -26,13 +26,7 @@ type RingProgressProps = {
 };
 
 /** Animated circular progress (SVG) — the day-score ring. Expo Go safe (no Skia). */
-function RingProgressBase({
-  progress,
-  label,
-  size = 132,
-  stroke = 12,
-  accent,
-}: RingProgressProps) {
+function RingProgressBase({ progress, label, size = 132, stroke = 12, accent }: RingProgressProps) {
   const colors = useColors();
   const resolvedAccent = accent ?? colors.accent;
   const r = (size - stroke) / 2;

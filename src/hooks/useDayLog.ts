@@ -1,7 +1,12 @@
 import { useMemo } from 'react';
 
 import { useSettingsStore } from '../stores/settingsStore';
-import { type DayTotals, entriesToTotals, type LogEntry, useTimerStore } from '../stores/timerStore';
+import {
+  type DayTotals,
+  entriesToTotals,
+  type LogEntry,
+  useTimerStore,
+} from '../stores/timerStore';
 import { dayKey } from '../utils/time';
 
 const EMPTY_ENTRIES: readonly LogEntry[] = Object.freeze([]);
@@ -26,9 +31,4 @@ export function useDayLog(key: string): DayLogView {
   const note = day?.note ?? '';
   const totals = useMemo(() => entriesToTotals(entries), [entries]);
   return { key, entries, note, totals };
-}
-
-/** Convenience: today's log, tracking the configured day-start hour. */
-export function useTodayLog(): DayLogView {
-  return useDayLog(useTodayKey());
 }

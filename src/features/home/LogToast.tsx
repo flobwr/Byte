@@ -1,6 +1,11 @@
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { Mascot } from '../../components/Mascot';
 import { AppText } from '../../components/ui/AppText';
@@ -35,7 +40,10 @@ export function LogToast({ feedback }: { feedback: LogFeedback | null }) {
 
   const style = useAnimatedStyle(() => ({
     opacity: progress.value,
-    transform: [{ translateY: (1 - progress.value) * -16 }, { scale: 0.96 + progress.value * 0.04 }],
+    transform: [
+      { translateY: (1 - progress.value) * -16 },
+      { scale: 0.96 + progress.value * 0.04 },
+    ],
   }));
 
   if (!feedback) return null;
@@ -53,9 +61,7 @@ export function LogToast({ feedback }: { feedback: LogFeedback | null }) {
           <Mascot name={feedback.mascot} size={34} animated={false} />
         </View>
         <View style={styles.textCol}>
-          <AppText variant="bodyStrong">
-            +{formatDuration(feedback.addedMs)}
-          </AppText>
+          <AppText variant="bodyStrong">+{formatDuration(feedback.addedMs)}</AppText>
           <AppText variant="caption" color="secondary">
             ajouté à {feedback.label}
           </AppText>

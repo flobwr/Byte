@@ -53,11 +53,19 @@ function ButtonBase({
     variant === 'primary'
       ? { backgroundColor: resolvedAccent, shadowColor: resolvedAccent, ...primaryShadow }
       : variant === 'secondary'
-        ? { backgroundColor: colors.surfaceElevated, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairlineStrong }
+        ? {
+            backgroundColor: colors.surfaceElevated,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairlineStrong,
+          }
         : { backgroundColor: 'transparent' };
 
   const fg =
-    variant === 'primary' ? colors.textOnAccent : variant === 'ghost' ? colors.textTertiary : colors.textPrimary;
+    variant === 'primary'
+      ? colors.textOnAccent
+      : variant === 'ghost'
+        ? colors.textTertiary
+        : colors.textPrimary;
 
   const handle = () => {
     if (haptic) Haptics.impactAsync(haptic);

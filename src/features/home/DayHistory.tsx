@@ -107,7 +107,12 @@ export function DayHistory({ entries, dayKey, canUndo, onUndoLast }: DayHistoryP
 }
 
 const styles = StyleSheet.create({
-  head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.lg },
+  head: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.lg,
+  },
   undo: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs },
   empty: { paddingVertical: spacing.sm },
   rows: { gap: spacing.xxs },

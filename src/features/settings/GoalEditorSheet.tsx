@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
 
@@ -11,6 +11,8 @@ import { radius, spacing } from '../../theme/spacing';
 import { useShadows } from '../../theme/shadows';
 import { useColors } from '../../theme/ThemeContext';
 import { formatDuration, MINUTE } from '../../utils/time';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const STEP = 15 * MINUTE;
 const MAX = 12 * 60 * MINUTE;
@@ -28,6 +30,12 @@ export function GoalEditorSheet({ category, initialMs, onClose, onSave }: GoalEd
   const shadows = useShadows();
   const [ms, setMs] = useState(initialMs);
 
+  // The sheet stays mounted across categories — reseed the stepper whenever a
+  // different activity (or its stored goal) is opened, not just on first mount.
+  useEffect(() => {
+    setMs(initialMs);
+  }, [category?.id, initialMs]);
+
   if (!category) return null;
   const accent = colorForCategory(category.id);
 
@@ -42,15 +50,22 @@ export function GoalEditorSheet({ category, initialMs, onClose, onSave }: GoalEd
   };
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable style={[styles.backdrop, { backgroundColor: colors.scrim }]} onPress={onClose}>
-        <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(140)} style={StyleSheet.absoluteFill} />
-      </Pressable>
+    <Modal visible transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
+      <AnimatedPressable
+        entering={FadeIn.duration(200)}
+        exiting={FadeOut.duration(160)}
+        style={[styles.backdrop, { backgroundColor: colors.scrim }]}
+        onPress={onClose}
+      />
       <View pointerEvents="box-none" style={styles.wrap}>
         <Animated.View
           entering={FadeInDown.duration(260).springify().damping(18)}
           exiting={FadeOut.duration(160)}
-          style={[styles.sheet, shadows.lg, { backgroundColor: colors.surfaceElevated, borderColor: colors.hairlineStrong }]}
+          style={[
+            styles.sheet,
+            shadows.lg,
+            { backgroundColor: colors.surfaceElevated, borderColor: colors.hairlineStrong },
+          ]}
         >
           <View style={styles.handle} />
           <View style={styles.head}>
@@ -99,7 +114,10 @@ export function GoalEditorSheet({ category, initialMs, onClose, onSave }: GoalEd
 
           <Pressable
             onPress={save}
-            style={({ pressed }) => [styles.save, { backgroundColor: accent, opacity: pressed ? 0.9 : 1 }]}
+            style={({ pressed }) => [
+              styles.save,
+              { backgroundColor: accent, opacity: pressed ? 0.9 : 1 },
+            ]}
             accessibilityRole="button"
           >
             <AppText variant="bodyStrong" style={{ color: colors.textOnAccent }}>
@@ -141,8 +159,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xl },
-  stepBtn: { width: 44, height: 44, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  stepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xl,
+  },
+  stepBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   value: { minWidth: 140, textAlign: 'center' },
   save: {
     height: 50,

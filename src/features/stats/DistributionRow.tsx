@@ -1,6 +1,12 @@
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming, Easing } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 
 import { Mascot } from '../../components/Mascot';
 import { AppText } from '../../components/ui/AppText';

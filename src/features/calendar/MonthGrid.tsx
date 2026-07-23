@@ -13,8 +13,18 @@ import { dayKey } from '../../utils/time';
 type Cell = { date: Date; key: string; inMonth: boolean };
 
 const MONTH_NAMES = [
-  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+  'Janvier',
+  'Février',
+  'Mars',
+  'Avril',
+  'Mai',
+  'Juin',
+  'Juillet',
+  'Août',
+  'Septembre',
+  'Octobre',
+  'Novembre',
+  'Décembre',
 ];
 
 function buildMonth(anchor: Date): Cell[] {
@@ -40,7 +50,15 @@ type MonthGridProps = {
   onChangeMonth: (deltaMonths: number) => void;
 };
 
-function MonthGridBase({ month, selectedKey, todayKey, minKey, markedKeys, onSelect, onChangeMonth }: MonthGridProps) {
+function MonthGridBase({
+  month,
+  selectedKey,
+  todayKey,
+  minKey,
+  markedKeys,
+  onSelect,
+  onChangeMonth,
+}: MonthGridProps) {
   const colors = useColors();
   const cells = buildMonth(month);
   const canGoNext = dayKey(new Date(month.getFullYear(), month.getMonth() + 1, 1)) <= todayKey;
@@ -51,7 +69,10 @@ function MonthGridBase({ month, selectedKey, todayKey, minKey, markedKeys, onSel
         <Pressable
           onPress={() => onChangeMonth(-1)}
           hitSlop={8}
-          style={({ pressed }) => [styles.nav, { backgroundColor: colors.fillSoft, opacity: pressed ? 0.7 : 1 }]}
+          style={({ pressed }) => [
+            styles.nav,
+            { backgroundColor: colors.fillSoft, opacity: pressed ? 0.7 : 1 },
+          ]}
           accessibilityRole="button"
           accessibilityLabel="Mois précédent"
         >
@@ -120,7 +141,13 @@ function MonthGridBase({ month, selectedKey, todayKey, minKey, markedKeys, onSel
               <View
                 style={[
                   styles.dot,
-                  { backgroundColor: marked ? (selected ? colors.accent : colors.amber) : 'transparent' },
+                  {
+                    backgroundColor: marked
+                      ? selected
+                        ? colors.accent
+                        : colors.amber
+                      : 'transparent',
+                  },
                 ]}
               />
             </Pressable>
@@ -132,13 +159,30 @@ function MonthGridBase({ month, selectedKey, todayKey, minKey, markedKeys, onSel
 }
 
 const styles = StyleSheet.create({
-  head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.lg },
-  nav: { width: 32, height: 32, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  head: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.lg,
+  },
+  nav: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   weekdays: { flexDirection: 'row', marginBottom: spacing.xs },
   weekday: { flex: 1, textAlign: 'center' },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
   cell: { width: `${100 / 7}%`, alignItems: 'center', paddingVertical: spacing.xxs },
-  cellInner: { width: 34, height: 34, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  cellInner: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   dot: { width: 4, height: 4, borderRadius: 2, marginTop: 3 },
 });
 

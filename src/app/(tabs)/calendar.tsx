@@ -85,7 +85,13 @@ export default function CalendarScreen() {
           entering={FadeInDown.delay(80).duration(motion.duration.reveal)}
         >
           <Card padding="xl" cornerRadius="xxl" style={styles.scoreCard}>
-            <RingProgress progress={detail.score} label="score" accent={scoreAccent} size={104} stroke={10} />
+            <RingProgress
+              progress={detail.score}
+              label="score"
+              accent={scoreAccent}
+              size={104}
+              stroke={10}
+            />
             <View style={styles.scoreBody}>
               <AppText variant="overline" color="tertiary">
                 Score du jour
@@ -100,11 +106,11 @@ export default function CalendarScreen() {
           </Card>
         </Animated.View>
 
-        {detail.byCategory.length > 0 && (
-          <Animated.View
-            key={`dist-${selectedKey}`}
-            entering={FadeInDown.delay(120).duration(motion.duration.reveal)}
-          >
+        <Animated.View
+          key={`dist-${selectedKey}`}
+          entering={FadeInDown.delay(120).duration(motion.duration.reveal)}
+        >
+          {detail.byCategory.length > 0 ? (
             <Card padding="xl" cornerRadius="xxl" style={styles.section}>
               <AppText variant="title3" style={styles.sectionTitle}>
                 Répartition
@@ -121,8 +127,14 @@ export default function CalendarScreen() {
                 ))}
               </View>
             </Card>
-          </Animated.View>
-        )}
+          ) : (
+            <Card padding="xxl" cornerRadius="xxl" style={[styles.section, styles.empty]}>
+              <AppText variant="body" color="secondary" align="center">
+                Aucune activité enregistrée ce jour-là.
+              </AppText>
+            </Card>
+          )}
+        </Animated.View>
 
         <Animated.View
           key={`hist-${selectedKey}`}
@@ -158,4 +170,5 @@ const styles = StyleSheet.create({
   section: { marginTop: spacing.lg },
   sectionTitle: { marginBottom: spacing.lg },
   rows: { gap: spacing.lg },
+  empty: { alignItems: 'center' },
 });

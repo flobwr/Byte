@@ -1,7 +1,15 @@
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
+import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  Layout,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
@@ -35,7 +43,10 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
   const scheme = useResolvedScheme();
 
   return (
-    <View pointerEvents="box-none" style={[styles.wrap, { paddingBottom: insets.bottom + spacing.sm }]}>
+    <View
+      pointerEvents="box-none"
+      style={[styles.wrap, { paddingBottom: insets.bottom + spacing.sm }]}
+    >
       <BlurView
         intensity={40}
         tint={scheme}
@@ -52,7 +63,11 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
           const focused = state.index === index;
           const onPress = () => {
             Haptics.selectionAsync();
-            const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
             if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
           };
           return (
@@ -85,10 +100,20 @@ function TabButton({
   colors: Colors;
 }) {
   const pressed = useSharedValue(0);
+  const focus = useSharedValue(focused ? 1 : 0);
+
+  useEffect(() => {
+    focus.value = withTiming(focused ? 1 : 0, {
+      duration: motion.duration.tab,
+      easing: motion.easing.standard,
+    });
+  }, [focused, focus]);
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: 1 - pressed.value * (1 - motion.press.scale) }],
     opacity: 1 - pressed.value * (1 - motion.press.dim),
   }));
+  const pillStyle = useAnimatedStyle(() => ({ opacity: focus.value }));
   const to = (v: number) =>
     withTiming(v, { duration: motion.duration.press, easing: motion.easing.standard });
 
@@ -103,13 +128,20 @@ function TabButton({
       accessibilityLabel={label}
     >
       <Animated.View
-        style={[styles.tabInner, focused && { backgroundColor: colors.fillMedium }, animatedStyle]}
+        layout={Layout.duration(motion.duration.tab)}
+        style={[styles.tabInner, animatedStyle]}
       >
+        <Animated.View
+          pointerEvents="none"
+          style={[styles.pill, { backgroundColor: colors.fillMedium }, pillStyle]}
+        />
         <Icon name={icon} size={22} color={focused ? colors.textPrimary : colors.textTertiary} />
         {focused && (
-          <AppText variant="caption" color="primary" style={styles.label}>
-            {label}
-          </AppText>
+          <Animated.View entering={FadeIn.duration(160)} exiting={FadeOut.duration(120)}>
+            <AppText variant="caption" color="primary" style={styles.label}>
+              {label}
+            </AppText>
+          </Animated.View>
         )}
       </Animated.View>
     </Pressable>
@@ -144,6 +176,8 @@ const styles = StyleSheet.create({
     minWidth: 52,
     justifyContent: 'center',
     borderRadius: radius.pill,
+    overflow: 'hidden',
   },
+  pill: { ...StyleSheet.absoluteFillObject, borderRadius: radius.pill },
   label: { marginRight: spacing.xxs },
 });

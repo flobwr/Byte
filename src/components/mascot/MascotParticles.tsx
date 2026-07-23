@@ -15,14 +15,7 @@ import { useColors } from '../../theme/ThemeContext';
 import { AppText } from '../ui/AppText';
 
 export type ParticleKind =
-  | 'zzz'
-  | 'notes'
-  | 'steam'
-  | 'sparkle'
-  | 'bubble'
-  | 'dot'
-  | 'glow'
-  | 'sweat';
+  'zzz' | 'notes' | 'steam' | 'sparkle' | 'bubble' | 'dot' | 'glow' | 'sweat';
 
 type FxConfig = {
   kind: ParticleKind;
@@ -171,7 +164,13 @@ function Particle({ kind, x, y, size, delay, duration, index }: ParticleProps) {
         pointerEvents="none"
         style={[
           styles.steam,
-          { left: x, top: y, width: Math.max(4, glyph * 0.42), height: glyph, backgroundColor: mist },
+          {
+            left: x,
+            top: y,
+            width: Math.max(4, glyph * 0.42),
+            height: glyph,
+            backgroundColor: mist,
+          },
           style,
         ]}
       />
@@ -197,7 +196,11 @@ function Particle({ kind, x, y, size, delay, duration, index }: ParticleProps) {
     return (
       <Animated.View
         pointerEvents="none"
-        style={[styles.sparkle, { left: x, top: y, width: d, height: d, backgroundColor: colors.amber }, style]}
+        style={[
+          styles.sparkle,
+          { left: x, top: y, width: d, height: d, backgroundColor: colors.amber },
+          style,
+        ]}
       />
     );
   }

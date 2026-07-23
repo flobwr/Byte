@@ -79,7 +79,12 @@ export default function HomeScreen() {
         </Animated.View>
 
         <Animated.View style={styles.hero} entering={FadeInDown.delay(70).duration(380)}>
-          <Stopwatch elapsedMs={elapsed} status={status} mascot={lastCategory ? heroMascot : null} accent={accent} />
+          <Stopwatch
+            elapsedMs={elapsed}
+            status={status}
+            mascot={lastCategory ? heroMascot : null}
+            accent={accent}
+          />
         </Animated.View>
 
         <Animated.View style={styles.controls} entering={FadeInDown.delay(130).duration(380)}>

@@ -22,7 +22,17 @@ type WeeklyBarsProps = {
   accent?: string;
 };
 
-function Bar({ bar, max, accent, index }: { bar: WeekBar; max: number; accent: string; index: number }) {
+function Bar({
+  bar,
+  max,
+  accent,
+  index,
+}: {
+  bar: WeekBar;
+  max: number;
+  accent: string;
+  index: number;
+}) {
   const colors = useColors();
   const grow = useSharedValue(0);
   const target = Math.max(bar.ms > 0 ? 0.06 : 0, bar.ms / max);

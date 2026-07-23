@@ -66,11 +66,29 @@ export default function StatsScreen() {
 
         {/* KPI tiles */}
         <View style={styles.tileRow}>
-          <StatTile label="Aujourd’hui" value={s.today} kind="duration" accent={colors.amber} index={2} />
-          <StatTile label="Cette semaine" value={s.week} kind="duration" accent={colors.accent} index={3} />
+          <StatTile
+            label="Aujourd’hui"
+            value={s.today}
+            kind="duration"
+            accent={colors.amber}
+            index={2}
+          />
+          <StatTile
+            label="Cette semaine"
+            value={s.week}
+            kind="duration"
+            accent={colors.accent}
+            index={3}
+          />
         </View>
         <View style={styles.tileRow}>
-          <StatTile label="Ce mois" value={s.month} kind="duration" accent={colors.positive} index={4} />
+          <StatTile
+            label="Ce mois"
+            value={s.month}
+            kind="duration"
+            accent={colors.positive}
+            index={4}
+          />
           <StatTile
             label="Depuis le début"
             value={s.allTime}

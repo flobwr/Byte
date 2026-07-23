@@ -11,8 +11,7 @@ export const HOUR = 60 * MINUTE;
  * the previous calendar day.
  */
 export function dayKey(date: Date = new Date(), dayStartHour = 0): string {
-  const shifted =
-    dayStartHour > 0 ? new Date(date.getTime() - dayStartHour * HOUR) : date;
+  const shifted = dayStartHour > 0 ? new Date(date.getTime() - dayStartHour * HOUR) : date;
   const y = shifted.getFullYear();
   const m = String(shifted.getMonth() + 1).padStart(2, '0');
   const d = String(shifted.getDate()).padStart(2, '0');
@@ -48,13 +47,4 @@ export function formatDurationCompact(ms: number): string {
   const m = Math.floor((totalSec % 3600) / 60);
   if (h > 0) return `${h}h${pad(m)}`;
   return `${m}m`;
-}
-
-/** Split ms into clock parts for animated digit rendering. */
-export function clockParts(ms: number): { h: number; m: number; s: number; showHours: boolean } {
-  const totalSec = Math.max(0, Math.floor(ms / SECOND));
-  const h = Math.floor(totalSec / 3600);
-  const m = Math.floor((totalSec % 3600) / 60);
-  const s = totalSec % 60;
-  return { h, m, s, showHours: h > 0 };
 }

@@ -30,7 +30,12 @@ function HomeHeaderBase({ totalTodayMs }: HomeHeaderProps) {
         <AppText variant="caption" color="tertiary">
           Aujourd’hui
         </AppText>
-        <AnimatedCount value={totalTodayMs} kind="duration" variant="bodyStrong" color={colors.amber} />
+        <AnimatedCount
+          value={totalTodayMs}
+          kind="duration"
+          variant="bodyStrong"
+          color={colors.amber}
+        />
       </View>
     </View>
   );
