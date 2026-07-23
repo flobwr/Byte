@@ -110,7 +110,6 @@ type CategoriesState = {
   addCategory: (input: NewCategoryInput) => CategoryId;
   updateCategory: (id: CategoryId, patch: Partial<Omit<Category, 'id'>>) => void;
   removeCategory: (id: CategoryId) => void;
-  toggleHidden: (id: CategoryId) => void;
   moveCategory: (id: CategoryId, direction: -1 | 1) => void;
   resetToDefaults: () => void;
 };
@@ -142,12 +141,6 @@ export const useCategoriesStore = create<CategoriesState>()(
 
       removeCategory: (id) => {
         set({ categories: get().categories.filter((c) => c.id !== id) });
-      },
-
-      toggleHidden: (id) => {
-        set({
-          categories: get().categories.map((c) => (c.id === id ? { ...c, hidden: !c.hidden } : c)),
-        });
       },
 
       moveCategory: (id, direction) => {

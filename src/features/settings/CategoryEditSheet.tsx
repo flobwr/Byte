@@ -186,6 +186,7 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
                 ]}
                 maxLength={24}
                 returnKeyType="done"
+                autoFocus={!category}
               />
             </View>
 
@@ -202,10 +203,11 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
                       Haptics.selectionAsync();
                       setMascot(key);
                     }}
-                    style={[
+                    style={({ pressed }) => [
                       styles.mascotOption,
                       { backgroundColor: active ? accent + '26' : colors.fillFaint },
                       active && { borderColor: accent },
+                      pressed && styles.pressedDim,
                     ]}
                     accessibilityRole="button"
                     accessibilityState={{ selected: active }}
@@ -230,10 +232,11 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
                       Haptics.selectionAsync();
                       setColor(key);
                     }}
-                    style={[
+                    style={({ pressed }) => [
                       styles.swatch,
                       { backgroundColor: hex },
                       active && { borderColor: colors.textPrimary },
+                      pressed && styles.pressedDim,
                     ]}
                     accessibilityRole="button"
                     accessibilityLabel={key}
@@ -256,12 +259,13 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
                       Haptics.selectionAsync();
                       setType(t);
                     }}
-                    style={[
+                    style={({ pressed }) => [
                       styles.typeOption,
                       {
                         backgroundColor: active ? colors.accent + '1A' : colors.surface,
                         borderColor: active ? colors.accent : colors.hairline,
                       },
+                      pressed && styles.pressedDim,
                     ]}
                     accessibilityRole="button"
                     accessibilityState={{ selected: active }}
@@ -286,9 +290,12 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
               <Pressable
                 onPress={() => step(-1)}
                 disabled={goalMs <= 0}
-                style={[
+                style={({ pressed }) => [
                   styles.stepBtn,
-                  { backgroundColor: colors.fillSoft, opacity: goalMs <= 0 ? 0.35 : 1 },
+                  {
+                    backgroundColor: colors.fillSoft,
+                    opacity: goalMs <= 0 ? 0.35 : pressed ? 0.7 : 1,
+                  },
                 ]}
                 accessibilityRole="button"
                 accessibilityLabel="Réduire l’objectif"
@@ -301,9 +308,12 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
               <Pressable
                 onPress={() => step(1)}
                 disabled={goalMs >= GOAL_MAX}
-                style={[
+                style={({ pressed }) => [
                   styles.stepBtn,
-                  { backgroundColor: colors.fillSoft, opacity: goalMs >= GOAL_MAX ? 0.35 : 1 },
+                  {
+                    backgroundColor: colors.fillSoft,
+                    opacity: goalMs >= GOAL_MAX ? 0.35 : pressed ? 0.7 : 1,
+                  },
                 ]}
                 accessibilityRole="button"
                 accessibilityLabel="Augmenter l’objectif"
@@ -332,7 +342,10 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
             <Pressable
               onPress={save}
               disabled={!canSave}
-              style={[styles.save, { backgroundColor: accent, opacity: canSave ? 1 : 0.4 }]}
+              style={({ pressed }) => [
+                styles.save,
+                { backgroundColor: accent, opacity: !canSave ? 0.4 : pressed ? 0.9 : 1 },
+              ]}
               accessibilityRole="button"
             >
               <AppText variant="bodyStrong" style={{ color: colors.textOnAccent }}>
@@ -362,6 +375,7 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
 const styles = StyleSheet.create({
   backdrop: { ...StyleSheet.absoluteFillObject },
   wrap: { flex: 1, justifyContent: 'flex-end' },
+  pressedDim: { opacity: 0.7 },
   sheet: {
     borderTopLeftRadius: radius.xxl,
     borderTopRightRadius: radius.xxl,

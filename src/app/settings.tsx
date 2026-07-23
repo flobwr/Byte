@@ -207,7 +207,7 @@ export default function SettingsScreen() {
           <Card padding="none" cornerRadius="xl" style={styles.card}>
             <Row
               label="Gérer les catégories"
-              value={`${categoryCount}`}
+              value={`${categoryCount} activité${categoryCount > 1 ? 's' : ''}`}
               onPress={() => router.push('/categories')}
               last
             />
