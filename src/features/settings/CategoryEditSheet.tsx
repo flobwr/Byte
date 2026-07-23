@@ -59,7 +59,6 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
   const updateCategory = useCategoriesStore((s) => s.updateCategory);
   const removeCategory = useCategoriesStore((s) => s.removeCategory);
   const visibleCount = useCategoriesStore((s) => selectVisibleCategories(s).length);
-  const goals = useSettingsStore((s) => s.goals);
   const setGoal = useSettingsStore((s) => s.setGoal);
 
   const category = target === 'new' ? null : target;
@@ -80,7 +79,10 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
       setColor(category.color);
       setType(category.type);
       setHidden(category.hidden);
-      setGoalMs(goals[category.id] ?? 0);
+      // Snapshot read (not subscribed) — we only want the goal as it stood
+      // when the sheet opened, not to overwrite an in-progress edit if it
+      // changes elsewhere while this sheet stays mounted.
+      setGoalMs(useSettingsStore.getState().goals[category.id] ?? 0);
     } else {
       setLabel('');
       setMascot('working');
@@ -89,6 +91,9 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
       setHidden(false);
       setGoalMs(0);
     }
+    // Intentionally keyed on category?.id, not the whole object: this should
+    // reseed the form when a *different* activity is opened, not every time
+    // the current one's fields change underneath it (e.g. right after save).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, category?.id]);
 
