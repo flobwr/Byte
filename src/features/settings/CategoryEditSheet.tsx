@@ -1,20 +1,11 @@
 import * as Haptics from 'expo-haptics';
 import { useEffect, useState } from 'react';
-import {
-  Alert,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  TextInput,
-  View,
-} from 'react-native';
-import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, TextInput, View } from 'react-native';
 
 import { Mascot } from '../../components/Mascot';
 import { AppText } from '../../components/ui/AppText';
 import { Icon } from '../../components/ui/Icon';
+import { Sheet } from '../../components/ui/Sheet';
 import { MASCOT_KEYS, type MascotKey } from '../../constants/mascots';
 import {
   CATEGORY_COLOR_KEYS,
@@ -27,14 +18,11 @@ import {
 } from '../../stores/categoriesStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { categoryColors, type CategoryColorKey } from '../../theme/colors';
-import { useShadows } from '../../theme/shadows';
 import { sizes } from '../../theme/sizes';
 import { radius, spacing } from '../../theme/spacing';
 import { useColors } from '../../theme/ThemeContext';
 import { typography } from '../../theme/typography';
 import { formatDuration, MINUTE } from '../../utils/time';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const GOAL_STEP = 15 * MINUTE;
 const GOAL_MAX = 12 * 60 * MINUTE;
@@ -54,7 +42,6 @@ type CategoryEditSheetProps = {
  */
 export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
   const colors = useColors();
-  const shadows = useShadows();
   const addCategory = useCategoriesStore((s) => s.addCategory);
   const updateCategory = useCategoriesStore((s) => s.updateCategory);
   const removeCategory = useCategoriesStore((s) => s.removeCategory);
@@ -96,8 +83,6 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
     // the current one's fields change underneath it (e.g. right after save).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, category?.id]);
-
-  if (!visible) return null;
 
   const accent = categoryColors[color];
   const trimmed = label.trim();
@@ -157,248 +142,205 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
   };
 
   return (
-    <Modal visible transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
-      <AnimatedPressable
-        entering={FadeIn.duration(200)}
-        exiting={FadeOut.duration(160)}
-        style={[styles.backdrop, { backgroundColor: colors.scrim }]}
-        onPress={onClose}
-      />
-      <View pointerEvents="box-none" style={styles.wrap}>
-        <Animated.View
-          entering={FadeInDown.duration(260).springify().damping(18)}
-          exiting={FadeOut.duration(160)}
-          style={[
-            styles.sheet,
-            shadows.lg,
-            { backgroundColor: colors.surfaceElevated, borderColor: colors.hairlineStrong },
-          ]}
-        >
-          <View style={styles.handle} />
-          <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-            <View style={styles.previewRow}>
-              <View style={[styles.previewThumb, { backgroundColor: accent + '22' }]}>
-                <Mascot name={mascot} size={sizes.thumbLg - 12} animated={false} />
-              </View>
-              <TextInput
-                value={label}
-                onChangeText={setLabel}
-                placeholder="Nom de l’activité"
-                placeholderTextColor={colors.textTertiary}
-                style={[
-                  styles.nameInput,
-                  { color: colors.textPrimary, borderBottomColor: colors.hairlineStrong },
+    <Sheet visible={visible} onClose={onClose} maxHeight="88%">
+      <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <View style={styles.previewRow}>
+          <View style={[styles.previewThumb, { backgroundColor: accent + '22' }]}>
+            <Mascot name={mascot} size={sizes.thumbLg - 12} animated={false} />
+          </View>
+          <TextInput
+            value={label}
+            onChangeText={setLabel}
+            placeholder="Nom de l’activité"
+            placeholderTextColor={colors.textTertiary}
+            style={[
+              styles.nameInput,
+              { color: colors.textPrimary, borderBottomColor: colors.hairlineStrong },
+            ]}
+            maxLength={24}
+            returnKeyType="done"
+            autoFocus={!category}
+          />
+        </View>
+
+        <AppText variant="overline" color="tertiary" style={styles.sectionLabel}>
+          Illustration
+        </AppText>
+        <View style={styles.mascotGrid}>
+          {MASCOT_KEYS.map((key) => {
+            const active = key === mascot;
+            return (
+              <Pressable
+                key={key}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setMascot(key);
+                }}
+                style={({ pressed }) => [
+                  styles.mascotOption,
+                  { backgroundColor: active ? accent + '26' : colors.fillFaint },
+                  active && { borderColor: accent },
+                  pressed && styles.pressedDim,
                 ]}
-                maxLength={24}
-                returnKeyType="done"
-                autoFocus={!category}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+              >
+                <Mascot name={key} size={30} animated={false} />
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <AppText variant="overline" color="tertiary" style={styles.sectionLabel}>
+          Couleur
+        </AppText>
+        <View style={styles.colorRow}>
+          {CATEGORY_COLOR_KEYS.map((key) => {
+            const hex = categoryColors[key];
+            const active = key === color;
+            return (
+              <Pressable
+                key={key}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setColor(key);
+                }}
+                style={({ pressed }) => [
+                  styles.swatch,
+                  { backgroundColor: hex },
+                  active && { borderColor: colors.textPrimary },
+                  pressed && styles.pressedDim,
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel={key}
+                accessibilityState={{ selected: active }}
               />
-            </View>
+            );
+          })}
+        </View>
 
-            <AppText variant="overline" color="tertiary" style={styles.sectionLabel}>
-              Illustration
-            </AppText>
-            <View style={styles.mascotGrid}>
-              {MASCOT_KEYS.map((key) => {
-                const active = key === mascot;
-                return (
-                  <Pressable
-                    key={key}
-                    onPress={() => {
-                      Haptics.selectionAsync();
-                      setMascot(key);
-                    }}
-                    style={({ pressed }) => [
-                      styles.mascotOption,
-                      { backgroundColor: active ? accent + '26' : colors.fillFaint },
-                      active && { borderColor: accent },
-                      pressed && styles.pressedDim,
-                    ]}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: active }}
-                  >
-                    <Mascot name={key} size={30} animated={false} />
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            <AppText variant="overline" color="tertiary" style={styles.sectionLabel}>
-              Couleur
-            </AppText>
-            <View style={styles.colorRow}>
-              {CATEGORY_COLOR_KEYS.map((key) => {
-                const hex = categoryColors[key];
-                const active = key === color;
-                return (
-                  <Pressable
-                    key={key}
-                    onPress={() => {
-                      Haptics.selectionAsync();
-                      setColor(key);
-                    }}
-                    style={({ pressed }) => [
-                      styles.swatch,
-                      { backgroundColor: hex },
-                      active && { borderColor: colors.textPrimary },
-                      pressed && styles.pressedDim,
-                    ]}
-                    accessibilityRole="button"
-                    accessibilityLabel={key}
-                    accessibilityState={{ selected: active }}
-                  />
-                );
-              })}
-            </View>
-
-            <AppText variant="overline" color="tertiary" style={styles.sectionLabel}>
-              Type
-            </AppText>
-            <View style={styles.typeRow}>
-              {TYPE_ORDER.map((t) => {
-                const active = t === type;
-                return (
-                  <Pressable
-                    key={t}
-                    onPress={() => {
-                      Haptics.selectionAsync();
-                      setType(t);
-                    }}
-                    style={({ pressed }) => [
-                      styles.typeOption,
-                      {
-                        backgroundColor: active ? colors.accent + '1A' : colors.surface,
-                        borderColor: active ? colors.accent : colors.hairline,
-                      },
-                      pressed && styles.pressedDim,
-                    ]}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: active }}
-                  >
-                    <AppText>{TYPE_EMOJI[t]}</AppText>
-                    <AppText
-                      variant="caption"
-                      color={active ? 'accent' : 'secondary'}
-                      align="center"
-                    >
-                      {CATEGORY_TYPE_LABEL[t]}
-                    </AppText>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            <AppText variant="overline" color="tertiary" style={styles.sectionLabel}>
-              Objectif quotidien
-            </AppText>
-            <View style={styles.stepper}>
+        <AppText variant="overline" color="tertiary" style={styles.sectionLabel}>
+          Type
+        </AppText>
+        <View style={styles.typeRow}>
+          {TYPE_ORDER.map((t) => {
+            const active = t === type;
+            return (
               <Pressable
-                onPress={() => step(-1)}
-                disabled={goalMs <= 0}
+                key={t}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setType(t);
+                }}
                 style={({ pressed }) => [
-                  styles.stepBtn,
+                  styles.typeOption,
                   {
-                    backgroundColor: colors.fillSoft,
-                    opacity: goalMs <= 0 ? 0.35 : pressed ? 0.7 : 1,
+                    backgroundColor: active ? colors.accent + '1A' : colors.surface,
+                    borderColor: active ? colors.accent : colors.hairline,
                   },
+                  pressed && styles.pressedDim,
                 ]}
                 accessibilityRole="button"
-                accessibilityLabel="Réduire l’objectif"
+                accessibilityState={{ selected: active }}
               >
-                <Icon name="chevronLeft" size={16} color={colors.textPrimary} />
-              </Pressable>
-              <AppText variant="bodyStrong" tabular style={styles.stepperValue}>
-                {goalMs > 0 ? formatDuration(goalMs) : 'Aucun'}
-              </AppText>
-              <Pressable
-                onPress={() => step(1)}
-                disabled={goalMs >= GOAL_MAX}
-                style={({ pressed }) => [
-                  styles.stepBtn,
-                  {
-                    backgroundColor: colors.fillSoft,
-                    opacity: goalMs >= GOAL_MAX ? 0.35 : pressed ? 0.7 : 1,
-                  },
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel="Augmenter l’objectif"
-              >
-                <Icon name="chevronRight" size={16} color={colors.textPrimary} />
-              </Pressable>
-            </View>
-
-            {category && (
-              <View style={[styles.hiddenRow, { borderColor: colors.hairline }]}>
-                <View style={styles.hiddenText}>
-                  <AppText variant="body">Visible sur l’accueil</AppText>
-                  <AppText variant="caption" color="tertiary">
-                    Masquer la retire de la grille sans effacer son historique.
-                  </AppText>
-                </View>
-                <Switch
-                  value={!hidden}
-                  onValueChange={toggleHidden}
-                  trackColor={{ false: colors.fillMedium, true: colors.positive }}
-                  thumbColor={colors.textOnAccent}
-                />
-              </View>
-            )}
-
-            <Pressable
-              onPress={save}
-              disabled={!canSave}
-              style={({ pressed }) => [
-                styles.save,
-                { backgroundColor: accent, opacity: !canSave ? 0.4 : pressed ? 0.9 : 1 },
-              ]}
-              accessibilityRole="button"
-            >
-              <AppText variant="bodyStrong" style={{ color: colors.textOnAccent }}>
-                Enregistrer
-              </AppText>
-            </Pressable>
-
-            {category && (
-              <Pressable
-                onPress={remove}
-                style={({ pressed }) => [styles.deleteRow, pressed && { opacity: 0.7 }]}
-                accessibilityRole="button"
-              >
-                <Icon name="trash" size={16} color={colors.danger} />
-                <AppText variant="callout" color="danger">
-                  Supprimer cette catégorie
+                <AppText>{TYPE_EMOJI[t]}</AppText>
+                <AppText variant="caption" color={active ? 'accent' : 'secondary'} align="center">
+                  {CATEGORY_TYPE_LABEL[t]}
                 </AppText>
               </Pressable>
-            )}
-          </ScrollView>
-        </Animated.View>
-      </View>
-    </Modal>
+            );
+          })}
+        </View>
+
+        <AppText variant="overline" color="tertiary" style={styles.sectionLabel}>
+          Objectif quotidien
+        </AppText>
+        <View style={styles.stepper}>
+          <Pressable
+            onPress={() => step(-1)}
+            disabled={goalMs <= 0}
+            style={({ pressed }) => [
+              styles.stepBtn,
+              {
+                backgroundColor: colors.fillSoft,
+                opacity: goalMs <= 0 ? 0.35 : pressed ? 0.7 : 1,
+              },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Réduire l’objectif"
+          >
+            <Icon name="chevronLeft" size={16} color={colors.textPrimary} />
+          </Pressable>
+          <AppText variant="bodyStrong" tabular style={styles.stepperValue}>
+            {goalMs > 0 ? formatDuration(goalMs) : 'Aucun'}
+          </AppText>
+          <Pressable
+            onPress={() => step(1)}
+            disabled={goalMs >= GOAL_MAX}
+            style={({ pressed }) => [
+              styles.stepBtn,
+              {
+                backgroundColor: colors.fillSoft,
+                opacity: goalMs >= GOAL_MAX ? 0.35 : pressed ? 0.7 : 1,
+              },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Augmenter l’objectif"
+          >
+            <Icon name="chevronRight" size={16} color={colors.textPrimary} />
+          </Pressable>
+        </View>
+
+        {category && (
+          <View style={[styles.hiddenRow, { borderColor: colors.hairline }]}>
+            <View style={styles.hiddenText}>
+              <AppText variant="body">Visible sur l’accueil</AppText>
+              <AppText variant="caption" color="tertiary">
+                Masquer la retire de la grille sans effacer son historique.
+              </AppText>
+            </View>
+            <Switch
+              value={!hidden}
+              onValueChange={toggleHidden}
+              trackColor={{ false: colors.fillMedium, true: colors.positive }}
+              thumbColor={colors.textOnAccent}
+            />
+          </View>
+        )}
+
+        <Pressable
+          onPress={save}
+          disabled={!canSave}
+          style={({ pressed }) => [
+            styles.save,
+            { backgroundColor: accent, opacity: !canSave ? 0.4 : pressed ? 0.9 : 1 },
+          ]}
+          accessibilityRole="button"
+        >
+          <AppText variant="bodyStrong" style={{ color: colors.textOnAccent }}>
+            Enregistrer
+          </AppText>
+        </Pressable>
+
+        {category && (
+          <Pressable
+            onPress={remove}
+            style={({ pressed }) => [styles.deleteRow, pressed && { opacity: 0.7 }]}
+            accessibilityRole="button"
+          >
+            <Icon name="trash" size={16} color={colors.danger} />
+            <AppText variant="callout" color="danger">
+              Supprimer cette catégorie
+            </AppText>
+          </Pressable>
+        )}
+      </ScrollView>
+    </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: { ...StyleSheet.absoluteFillObject },
-  wrap: { flex: 1, justifyContent: 'flex-end' },
   pressedDim: { opacity: 0.7 },
-  sheet: {
-    borderTopLeftRadius: radius.xxl,
-    borderTopRightRadius: radius.xxl,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: 0,
-    paddingTop: spacing.sm,
-    paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.xxxl,
-    maxHeight: '88%',
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(128,128,128,0.35)',
-    marginBottom: spacing.lg,
-  },
   previewRow: {
     flexDirection: 'row',
     alignItems: 'center',
