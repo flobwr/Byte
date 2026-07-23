@@ -1,6 +1,13 @@
 import { useMemo } from 'react';
 
-import { type Category, type CategoryId, DEFAULT_CATEGORIES } from '../../constants/categories';
+import {
+  type Category,
+  type CategoryId,
+  type CategoryType,
+  resolveCategory,
+  selectVisibleCategories,
+  useCategoriesStore,
+} from '../../stores/categoriesStore';
 import { useMetaStore } from '../../stores/metaStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import {
@@ -15,8 +22,9 @@ import { dayKey } from '../../utils/time';
 export type CategoryTotal = { category: Category; ms: number };
 export type WeekBar = { label: string; ms: number; isToday: boolean };
 
-/** Categories that count as "focused" time for the day score. */
-const FOCUS: readonly CategoryId[] = ['work', 'study', 'read', 'sport'];
+/** How much each category type counts toward the day score — progress helps
+ * it, waste hurts it, essential is neutral. */
+const TYPE_WEIGHT: Record<CategoryType, number> = { progress: 1, essential: 0.5, waste: -0.5 };
 
 export function scoreBand(score: number): string {
   if (score === 0) return '—';
@@ -26,17 +34,22 @@ export function scoreBand(score: number): string {
   return 'À équilibrer';
 }
 
-/** 0..100 — the share of a day's tracked time spent on "focused" activities. */
+/** 0..100 — weighted by each logged activity's type (progress/essential/waste). */
 export function scoreForTotals(totals: DayTotals): number {
   const total = Object.values(totals).reduce<number>((a, v) => a + (v ?? 0), 0);
   if (total <= 0) return 0;
-  const focusMs = FOCUS.reduce<number>((a, cid) => a + (totals[cid] ?? 0), 0);
-  return Math.round((focusMs / total) * 100);
+  let weighted = 0;
+  for (const [id, ms] of Object.entries(totals)) {
+    if (!ms) continue;
+    weighted += TYPE_WEIGHT[resolveCategory(id).type] * ms;
+  }
+  return Math.max(0, Math.min(100, Math.round((weighted / total) * 100)));
 }
 
 export function rankCategories(source: Partial<Record<CategoryId, number>>): CategoryTotal[] {
-  return DEFAULT_CATEGORIES.map((category) => ({ category, ms: source[category.id] ?? 0 }))
-    .filter((r) => r.ms > 0)
+  return Object.entries(source)
+    .filter(([, ms]) => (ms ?? 0) > 0)
+    .map(([id, ms]) => ({ category: resolveCategory(id), ms: ms ?? 0 }))
     .sort((a, b) => b.ms - a.ms);
 }
 
@@ -62,7 +75,12 @@ const sumDay = (d: DayTotals): number => Object.values(d).reduce<number>((a, v) 
 const dayTotals = (history: History, key: string): DayTotals =>
   entriesToTotals(history[key]?.entries ?? []);
 
-function compute(history: History, createdAt: number | null, dayStartHour: number): Stats {
+function compute(
+  history: History,
+  createdAt: number | null,
+  dayStartHour: number,
+  categoriesCount: number,
+): Stats {
   const todayKey = dayKey(new Date(), dayStartHour);
   const weekKeys = new Set(currentWeekKeys());
 
@@ -82,8 +100,8 @@ function compute(history: History, createdAt: number | null, dayStartHour: numbe
     allTime += total;
     if (weekKeys.has(key)) week += total;
     if (isSameMonth(key)) month += total;
-    for (const [cid, ms] of Object.entries(day) as [CategoryId, number][]) {
-      if (ms > 0) {
+    for (const [cid, ms] of Object.entries(day)) {
+      if (ms && ms > 0) {
         activityCount += 1;
         allByCat[cid] = (allByCat[cid] ?? 0) + ms;
       }
@@ -109,7 +127,7 @@ function compute(history: History, createdAt: number | null, dayStartHour: numbe
     allTime,
     activityCount,
     daysTracked,
-    categoriesCount: DEFAULT_CATEGORIES.length,
+    categoriesCount,
     todayByCategory: rankCategories(todayCategoryTotals),
     allTimeByCategory: rankCategories(allByCat),
     weekBars,
@@ -125,8 +143,9 @@ export function useStats(): Stats {
   const history = useTimerStore((s) => s.history);
   const createdAt = useMetaStore((s) => s.createdAt);
   const dayStartHour = useSettingsStore((s) => s.dayStartHour);
+  const categoriesCount = useCategoriesStore((s) => selectVisibleCategories(s).length);
   return useMemo(
-    () => compute(history, createdAt, dayStartHour),
-    [history, createdAt, dayStartHour],
+    () => compute(history, createdAt, dayStartHour, categoriesCount),
+    [history, createdAt, dayStartHour, categoriesCount],
   );
 }

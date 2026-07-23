@@ -6,14 +6,16 @@ import { Mascot } from '../../components/Mascot';
 import { AppText } from '../../components/ui/AppText';
 import { Icon } from '../../components/ui/Icon';
 import {
-  CATEGORY_BY_ID,
-  colorForCategory,
-  DEFAULT_CATEGORIES,
   type CategoryId,
-} from '../../constants/categories';
+  colorForCategory,
+  resolveCategory,
+  selectVisibleCategories,
+  useCategoriesStore,
+} from '../../stores/categoriesStore';
 import { type LogEntry, useTimerStore } from '../../stores/timerStore';
 import { radius, spacing } from '../../theme/spacing';
 import { useShadows } from '../../theme/shadows';
+import { sizes } from '../../theme/sizes';
 import { useColors } from '../../theme/ThemeContext';
 import { formatDuration } from '../../utils/time';
 
@@ -31,6 +33,7 @@ export function EditEntrySheet({ entry, dayKey, onClose }: EditEntrySheetProps) 
   const shadows = useShadows();
   const editEntry = useTimerStore((s) => s.editEntry);
   const deleteEntry = useTimerStore((s) => s.deleteEntry);
+  const categories = useCategoriesStore(selectVisibleCategories);
 
   if (!entry) return null;
 
@@ -79,13 +82,13 @@ export function EditEntrySheet({ entry, dayKey, onClose }: EditEntrySheetProps) 
           <View style={styles.head}>
             <AppText variant="title3">Réattribuer à…</AppText>
             <AppText variant="callout" color="secondary">
-              {formatDuration(entry.ms)} actuellement sur {CATEGORY_BY_ID[entry.category].label}
+              {formatDuration(entry.ms)} actuellement sur {resolveCategory(entry.category).label}
             </AppText>
           </View>
 
           <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
             <View style={styles.grid}>
-              {DEFAULT_CATEGORIES.map((cat) => {
+              {categories.map((cat) => {
                 const active = cat.id === entry.category;
                 const accent = colorForCategory(cat.id);
                 return (
@@ -103,7 +106,7 @@ export function EditEntrySheet({ entry, dayKey, onClose }: EditEntrySheetProps) 
                     accessibilityLabel={cat.label}
                   >
                     <View style={[styles.optionThumb, { backgroundColor: accent + '22' }]}>
-                      <Mascot name={cat.mascot} size={30} animated={false} />
+                      <Mascot name={cat.mascot} size={sizes.thumbMd - 14} animated={false} />
                     </View>
                     <AppText variant="callout" numberOfLines={1}>
                       {cat.label}
@@ -164,8 +167,8 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
   },
   optionThumb: {
-    width: 40,
-    height: 40,
+    width: sizes.thumbMd,
+    height: sizes.thumbMd,
     borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',

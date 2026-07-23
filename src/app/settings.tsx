@@ -1,7 +1,6 @@
 import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,9 +9,7 @@ import { AppText } from '../components/ui/AppText';
 import { Card } from '../components/ui/Card';
 import { Icon, type IconName } from '../components/ui/Icon';
 import { Screen } from '../components/ui/Screen';
-import { DEFAULT_CATEGORIES, type Category, colorForCategory } from '../constants/categories';
-import { GoalEditorSheet } from '../features/settings/GoalEditorSheet';
-import { Mascot } from '../components/Mascot';
+import { useCategoriesStore } from '../stores/categoriesStore';
 import { useMetaStore } from '../stores/metaStore';
 import { type ThemeMode, useSettingsStore } from '../stores/settingsStore';
 import { useTimerStore } from '../stores/timerStore';
@@ -20,7 +17,6 @@ import { motion } from '../theme/motion';
 import { radius, spacing } from '../theme/spacing';
 import { useColors } from '../theme/ThemeContext';
 import { formatShortDate } from '../utils/dateRange';
-import { formatDuration } from '../utils/time';
 
 const THEME_OPTIONS: { mode: ThemeMode; label: string; icon: IconName }[] = [
   { mode: 'system', label: 'Système', icon: 'settings' },
@@ -88,12 +84,9 @@ export default function SettingsScreen() {
   const setThemeMode = useSettingsStore((s) => s.setThemeMode);
   const dayStartHour = useSettingsStore((s) => s.dayStartHour);
   const setDayStartHour = useSettingsStore((s) => s.setDayStartHour);
-  const goals = useSettingsStore((s) => s.goals);
-  const setGoal = useSettingsStore((s) => s.setGoal);
   const createdAt = useMetaStore((s) => s.createdAt);
   const resetAll = useTimerStore((s) => s.resetAll);
-
-  const [editingGoal, setEditingGoal] = useState<Category | null>(null);
+  const categoryCount = useCategoriesStore((s) => s.categories.length);
 
   const confirmReset = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -210,39 +203,14 @@ export default function SettingsScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(100).duration(motion.duration.reveal)}>
-          <SectionTitle>Objectifs quotidiens</SectionTitle>
+          <SectionTitle>Activités</SectionTitle>
           <Card padding="none" cornerRadius="xl" style={styles.card}>
-            {DEFAULT_CATEGORIES.map((cat, i) => {
-              const goalMs = goals[cat.id];
-              const accent = colorForCategory(cat.id);
-              return (
-                <Pressable
-                  key={cat.id}
-                  onPress={() => setEditingGoal(cat)}
-                  android_ripple={{ color: colors.fillSoft }}
-                  style={({ pressed }) => [
-                    styles.goalRow,
-                    pressed && { backgroundColor: colors.fillFaint },
-                  ]}
-                >
-                  <View style={styles.goalLeft}>
-                    <View style={[styles.goalThumb, { backgroundColor: accent + '1F' }]}>
-                      <Mascot name={cat.mascot} size={26} animated={false} />
-                    </View>
-                    <AppText variant="body">{cat.label}</AppText>
-                  </View>
-                  <View style={styles.rowRight}>
-                    <AppText variant="callout" color={goalMs ? 'secondary' : 'tertiary'} tabular>
-                      {goalMs ? formatDuration(goalMs) : 'Aucun'}
-                    </AppText>
-                    <Icon name="chevronRight" size={18} color={colors.textTertiary} />
-                  </View>
-                  {i < DEFAULT_CATEGORIES.length - 1 && (
-                    <View style={[styles.rowDivider, { backgroundColor: colors.hairline }]} />
-                  )}
-                </Pressable>
-              );
-            })}
+            <Row
+              label="Gérer les catégories"
+              value={`${categoryCount}`}
+              onPress={() => router.push('/categories')}
+              last
+            />
           </Card>
         </Animated.View>
 
@@ -261,13 +229,6 @@ export default function SettingsScreen() {
           </Card>
         </Animated.View>
       </ScrollView>
-
-      <GoalEditorSheet
-        category={editingGoal}
-        initialMs={editingGoal ? (goals[editingGoal.id] ?? 0) : 0}
-        onClose={() => setEditingGoal(null)}
-        onSave={(ms) => editingGoal && setGoal(editingGoal.id, ms)}
-      />
     </Screen>
   );
 }
@@ -318,29 +279,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stepperValue: { minWidth: 56, textAlign: 'center' },
-  goalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
-  },
-  goalLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  goalThumb: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  rowDivider: {
-    position: 'absolute',
-    left: spacing.xl + 40 + spacing.md,
-    right: 0,
-    bottom: 0,
-    height: StyleSheet.hairlineWidth,
-  },
   rowItem: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -5,8 +5,8 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Screen } from '../../components/ui/Screen';
-import { CATEGORY_BY_ID, type CategoryId, colorForCategory } from '../../constants/categories';
 import { RUNNING_MASCOT } from '../../constants/mascots';
+import { type CategoryId, colorForCategory, resolveCategory } from '../../stores/categoriesStore';
 import { CategoryGrid } from '../../features/home/CategoryGrid';
 import { DayControls } from '../../features/home/DayControls';
 import { DayHistory } from '../../features/home/DayHistory';
@@ -43,13 +43,13 @@ export default function HomeScreen() {
   const [feedback, setFeedback] = useState<LogFeedback | null>(null);
 
   const accent = lastCategory ? colorForCategory(lastCategory) : colors.accent;
-  const heroMascot = lastCategory ? CATEGORY_BY_ID[lastCategory].mascot : RUNNING_MASCOT;
+  const heroMascot = lastCategory ? resolveCategory(lastCategory).mascot : RUNNING_MASCOT;
 
   const onLog = useCallback(
     (id: CategoryId) => {
       const added = logCategory(id);
       if (added <= 0) return;
-      const cat = CATEGORY_BY_ID[id];
+      const cat = resolveCategory(id);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setFeedback({
         id: Date.now(),

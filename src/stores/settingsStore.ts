@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { type CategoryId } from '../constants/categories';
+import { type CategoryId } from './categoriesStore';
 import { zustandStorage } from '../services/storage';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
@@ -15,6 +15,7 @@ type SettingsState = {
   setThemeMode: (mode: ThemeMode) => void;
   setDayStartHour: (hour: number) => void;
   setGoal: (id: CategoryId, ms: number | null) => void;
+  clearGoals: () => void;
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -34,6 +35,8 @@ export const useSettingsStore = create<SettingsState>()(
         else goals[id] = ms;
         set({ goals });
       },
+
+      clearGoals: () => set({ goals: {} }),
     }),
     {
       name: 'byte.settings',

@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '../../components/ui/AppText';
 import { Card } from '../../components/ui/Card';
 import { Screen } from '../../components/ui/Screen';
-import { colorForCategory } from '../../constants/categories';
+import { categoryColors } from '../../theme/colors';
 import { DistributionRow } from '../../features/stats/DistributionRow';
 import { RingProgress } from '../../features/stats/RingProgress';
 import { StatTile } from '../../features/stats/StatTile';
@@ -23,9 +23,6 @@ export default function StatsScreen() {
 
   const scoreAccent =
     s.dayScore >= 75 ? colors.positive : s.dayScore >= 40 ? colors.accent : colors.amber;
-  const topAccent = s.allTimeByCategory[0]
-    ? colorForCategory(s.allTimeByCategory[0].category.id)
-    : colors.accent;
 
   const todayMax = s.todayByCategory[0]?.ms ?? 1;
   const allMax = s.allTimeByCategory[0]?.ms ?? 1;
@@ -77,7 +74,7 @@ export default function StatsScreen() {
             label="Cette semaine"
             value={s.week}
             kind="duration"
-            accent={colors.accent}
+            accent={categoryColors.violet}
             index={3}
           />
         </View>
@@ -94,7 +91,7 @@ export default function StatsScreen() {
             value={s.allTime}
             kind="duration"
             hint={`${s.daysTracked} jour${s.daysTracked > 1 ? 's' : ''} · ${s.activityCount} activité${s.activityCount > 1 ? 's' : ''}`}
-            accent={topAccent}
+            accent={categoryColors.sky}
             index={5}
           />
         </View>

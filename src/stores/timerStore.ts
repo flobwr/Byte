@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { type CategoryId } from '../constants/categories';
+import { type CategoryId } from './categoriesStore';
 import { zustandStorage } from '../services/storage';
 import { useSettingsStore } from './settingsStore';
 import { parseDayKey } from '../utils/dateRange';

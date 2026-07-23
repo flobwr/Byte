@@ -2,7 +2,12 @@ import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-import { type Category, type CategoryId, DEFAULT_CATEGORIES } from '../../constants/categories';
+import {
+  type Category,
+  type CategoryId,
+  selectVisibleCategories,
+  useCategoriesStore,
+} from '../../stores/categoriesStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { type DayTotals } from '../../stores/timerStore';
 import { spacing } from '../../theme/spacing';
@@ -17,9 +22,10 @@ type CategoryGridProps = {
 /** 2-column grid of activity cards with a staggered entrance. */
 function CategoryGridBase({ totals, disabled, onLog }: CategoryGridProps) {
   const goals = useSettingsStore((s) => s.goals);
+  const categories = useCategoriesStore(selectVisibleCategories);
   const rows: Category[][] = [];
-  for (let i = 0; i < DEFAULT_CATEGORIES.length; i += 2) {
-    rows.push(DEFAULT_CATEGORIES.slice(i, i + 2));
+  for (let i = 0; i < categories.length; i += 2) {
+    rows.push(categories.slice(i, i + 2));
   }
 
   return (

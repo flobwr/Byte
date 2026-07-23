@@ -7,9 +7,10 @@ import { Mascot } from '../../components/Mascot';
 import { AppText } from '../../components/ui/AppText';
 import { Card } from '../../components/ui/Card';
 import { Icon } from '../../components/ui/Icon';
-import { CATEGORY_BY_ID, colorForCategory } from '../../constants/categories';
+import { colorForCategory, resolveCategory } from '../../stores/categoriesStore';
 import { type LogEntry } from '../../stores/timerStore';
 import { radius, spacing } from '../../theme/spacing';
+import { sizes } from '../../theme/sizes';
 import { useColors } from '../../theme/ThemeContext';
 import { formatDuration } from '../../utils/time';
 import { EditEntrySheet } from './EditEntrySheet';
@@ -64,7 +65,7 @@ export function DayHistory({ entries, dayKey, canUndo, onUndoLast }: DayHistoryP
       ) : (
         <View style={styles.rows}>
           {entries.map((entry, i) => {
-            const cat = CATEGORY_BY_ID[entry.category];
+            const cat = resolveCategory(entry.category);
             const accent = colorForCategory(entry.category);
             return (
               <Animated.View
@@ -85,7 +86,7 @@ export function DayHistory({ entries, dayKey, canUndo, onUndoLast }: DayHistoryP
                     {formatTime(entry.startedAt)}
                   </AppText>
                   <View style={[styles.thumb, { backgroundColor: accent + '1F' }]}>
-                    <Mascot name={cat.mascot} size={26} animated={false} />
+                    <Mascot name={cat.mascot} size={sizes.thumbSm - 10} animated={false} />
                   </View>
                   <AppText variant="callout" style={styles.label} numberOfLines={1}>
                     {cat.label}
@@ -126,8 +127,8 @@ const styles = StyleSheet.create({
   },
   time: { width: 44 },
   thumb: {
-    width: 36,
-    height: 36,
+    width: sizes.thumbSm,
+    height: sizes.thumbSm,
     borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',

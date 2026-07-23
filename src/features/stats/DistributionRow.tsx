@@ -10,9 +10,10 @@ import Animated, {
 
 import { Mascot } from '../../components/Mascot';
 import { AppText } from '../../components/ui/AppText';
-import { type Category } from '../../constants/categories';
+import { type Category } from '../../stores/categoriesStore';
 import { categoryColors } from '../../theme/colors';
 import { radius, spacing } from '../../theme/spacing';
+import { sizes } from '../../theme/sizes';
 import { useColors } from '../../theme/ThemeContext';
 import { formatDuration } from '../../utils/time';
 
@@ -41,7 +42,7 @@ export function DistributionRow({ category, ms, fraction, index }: DistributionR
   return (
     <View style={styles.row}>
       <View style={[styles.thumb, { backgroundColor: accent + '1F' }]}>
-        <Mascot name={category.mascot} size={34} animated={false} />
+        <Mascot name={category.mascot} size={sizes.thumbMd - 10} animated={false} />
       </View>
       <View style={styles.body}>
         <View style={styles.labelRow}>
@@ -61,8 +62,8 @@ export function DistributionRow({ category, ms, fraction, index }: DistributionR
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   thumb: {
-    width: 44,
-    height: 44,
+    width: sizes.thumbMd,
+    height: sizes.thumbMd,
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',

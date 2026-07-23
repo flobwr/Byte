@@ -21,6 +21,9 @@ export const MASCOTS = {
 
 export type MascotKey = keyof typeof MASCOTS;
 
+/** Every sprite as a flat, orderable list — for illustration pickers. */
+export const MASCOT_KEYS = Object.keys(MASCOTS) as MascotKey[];
+
 /** Shown when the day hasn't started yet. */
 export const IDLE_MASCOT: MascotKey = 'sleeping';
 /** Shown while the global stopwatch is running with no declared activity. */
