@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Alert, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
+import { useShallow } from 'zustand/react/shallow';
 
 import { Mascot } from '../../components/Mascot';
 import { AppText } from '../../components/ui/AppText';
@@ -33,7 +34,7 @@ export function EditEntrySheet({ entry, dayKey, onClose }: EditEntrySheetProps) 
   const shadows = useShadows();
   const editEntry = useTimerStore((s) => s.editEntry);
   const deleteEntry = useTimerStore((s) => s.deleteEntry);
-  const categories = useCategoriesStore(selectVisibleCategories);
+  const categories = useCategoriesStore(useShallow(selectVisibleCategories));
 
   if (!entry) return null;
 

@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useShallow } from 'zustand/react/shallow';
 
 import {
   type Category,
@@ -22,7 +23,7 @@ type CategoryGridProps = {
 /** 2-column grid of activity cards with a staggered entrance. */
 function CategoryGridBase({ totals, disabled, onLog }: CategoryGridProps) {
   const goals = useSettingsStore((s) => s.goals);
-  const categories = useCategoriesStore(selectVisibleCategories);
+  const categories = useCategoriesStore(useShallow(selectVisibleCategories));
   const rows: Category[][] = [];
   for (let i = 0; i < categories.length; i += 2) {
     rows.push(categories.slice(i, i + 2));
