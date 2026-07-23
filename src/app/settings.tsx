@@ -9,6 +9,7 @@ import { AppText } from '../components/ui/AppText';
 import { Card } from '../components/ui/Card';
 import { Icon, type IconName } from '../components/ui/Icon';
 import { Screen } from '../components/ui/Screen';
+import { useAuthStore } from '../stores/authStore';
 import { useCategoriesStore } from '../stores/categoriesStore';
 import { useMetaStore } from '../stores/metaStore';
 import { type ThemeMode, useSettingsStore } from '../stores/settingsStore';
@@ -87,6 +88,8 @@ export default function SettingsScreen() {
   const createdAt = useMetaStore((s) => s.createdAt);
   const resetAll = useTimerStore((s) => s.resetAll);
   const categoryCount = useCategoriesStore((s) => s.categories.length);
+  const email = useAuthStore((s) => s.user?.email);
+  const signOut = useAuthStore((s) => s.signOut);
 
   const confirmReset = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -98,6 +101,14 @@ export default function SettingsScreen() {
         { text: 'Effacer', style: 'destructive', onPress: resetAll },
       ],
     );
+  };
+
+  const confirmSignOut = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Alert.alert('Se déconnecter', 'Tu devras te reconnecter pour retrouver tes données.', [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Se déconnecter', style: 'destructive', onPress: signOut },
+    ]);
   };
 
   const dayStartLabel = `${String(dayStartHour).padStart(2, '0')}h00`;
@@ -217,13 +228,21 @@ export default function SettingsScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(140).duration(motion.duration.reveal)}>
+          <SectionTitle>Compte</SectionTitle>
+          <Card padding="none" cornerRadius="xl" style={styles.card}>
+            <Row label="Connecté en tant que" value={email ?? '—'} />
+            <Row label="Se déconnecter" onPress={confirmSignOut} last />
+          </Card>
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(180).duration(motion.duration.reveal)}>
           <SectionTitle>Données</SectionTitle>
           <Card padding="none" cornerRadius="xl" style={styles.card}>
             <Row label="Réinitialiser les données" onPress={confirmReset} danger last />
           </Card>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(180).duration(motion.duration.reveal)}>
+        <Animated.View entering={FadeInDown.delay(220).duration(motion.duration.reveal)}>
           <SectionTitle>À propos</SectionTitle>
           <Card padding="none" cornerRadius="xl" style={styles.card}>
             <Row label="Données depuis" value={createdAt ? formatShortDate(createdAt) : '—'} />

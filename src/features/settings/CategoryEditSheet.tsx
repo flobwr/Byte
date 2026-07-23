@@ -11,12 +11,10 @@ import {
   CATEGORY_COLOR_KEYS,
   CATEGORY_TYPE_LABEL,
   type Category,
-  type CategoryId,
   type CategoryType,
   selectVisibleCategories,
   useCategoriesStore,
 } from '../../stores/categoriesStore';
-import { useSettingsStore } from '../../stores/settingsStore';
 import { categoryColors, type CategoryColorKey } from '../../theme/colors';
 import { sizes } from '../../theme/sizes';
 import { radius, spacing } from '../../theme/spacing';
@@ -46,7 +44,6 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
   const updateCategory = useCategoriesStore((s) => s.updateCategory);
   const removeCategory = useCategoriesStore((s) => s.removeCategory);
   const visibleCount = useCategoriesStore((s) => selectVisibleCategories(s).length);
-  const setGoal = useSettingsStore((s) => s.setGoal);
 
   const category = target === 'new' ? null : target;
   const visible = target !== null;
@@ -66,10 +63,7 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
       setColor(category.color);
       setType(category.type);
       setHidden(category.hidden);
-      // Snapshot read (not subscribed) — we only want the goal as it stood
-      // when the sheet opened, not to overwrite an in-progress edit if it
-      // changes elsewhere while this sheet stays mounted.
-      setGoalMs(useSettingsStore.getState().goals[category.id] ?? 0);
+      setGoalMs(category.goalMs);
     } else {
       setLabel('');
       setMascot('working');
@@ -96,14 +90,11 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
   const save = () => {
     if (!canSave) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    let id: CategoryId;
     if (category) {
-      updateCategory(category.id, { label: trimmed, mascot, color, type, hidden });
-      id = category.id;
+      updateCategory(category.id, { label: trimmed, mascot, color, type, hidden, goalMs });
     } else {
-      id = addCategory({ label: trimmed, mascot, color, type });
+      addCategory({ label: trimmed, mascot, color, type, goalMs });
     }
-    setGoal(id, goalMs > 0 ? goalMs : null);
     onClose();
   };
 
@@ -133,7 +124,6 @@ export function CategoryEditSheet({ target, onClose }: CategoryEditSheetProps) {
           style: 'destructive',
           onPress: () => {
             removeCategory(category.id);
-            setGoal(category.id, null);
             onClose();
           },
         },

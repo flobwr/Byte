@@ -15,7 +15,6 @@ import {
   type CategoryType,
   useCategoriesStore,
 } from '../stores/categoriesStore';
-import { useSettingsStore } from '../stores/settingsStore';
 import { categoryColors } from '../theme/colors';
 import { motion } from '../theme/motion';
 import { radius, spacing } from '../theme/spacing';
@@ -34,7 +33,6 @@ export default function CategoriesScreen() {
   const categories = useCategoriesStore((s) => s.categories);
   const moveCategory = useCategoriesStore((s) => s.moveCategory);
   const resetToDefaults = useCategoriesStore((s) => s.resetToDefaults);
-  const clearGoals = useSettingsStore((s) => s.clearGoals);
   const [editing, setEditing] = useState<Category | 'new' | null>(null);
 
   const confirmReset = () => {
@@ -47,10 +45,7 @@ export default function CategoriesScreen() {
         {
           text: 'Réinitialiser',
           style: 'destructive',
-          onPress: () => {
-            resetToDefaults();
-            clearGoals();
-          },
+          onPress: resetToDefaults,
         },
       ],
     );

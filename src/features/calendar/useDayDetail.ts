@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { rankCategories, scoreBand, scoreForTotals } from '../stats/useStats';
+import { rankCategories, scoreBand, scoreForTotals } from '../stats/score';
 import { useDayLog } from '../../hooks/useDayLog';
 import { sumTotals } from '../../stores/timerStore';
 

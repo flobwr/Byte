@@ -34,14 +34,26 @@ type Variant = {
 
 export const typography = {
   // Editorial header (serif italic accents, à la the Dribbble refs)
-  display: { fontFamily: serif, fontSize: 34, lineHeight: 40, fontWeight: '600', letterSpacing: 0.2 },
+  display: {
+    fontFamily: serif,
+    fontSize: 34,
+    lineHeight: 40,
+    fontWeight: '600',
+    letterSpacing: 0.2,
+  },
   title1: { fontFamily: sans, fontSize: 28, lineHeight: 34, fontWeight: '700', letterSpacing: 0.2 },
   title2: { fontFamily: sans, fontSize: 22, lineHeight: 28, fontWeight: '700' },
   title3: { fontFamily: sans, fontSize: 18, lineHeight: 24, fontWeight: '600' },
   body: { fontFamily: sans, fontSize: 16, lineHeight: 22, fontWeight: '400' },
   bodyStrong: { fontFamily: sans, fontSize: 16, lineHeight: 22, fontWeight: '600' },
   callout: { fontFamily: sans, fontSize: 14, lineHeight: 19, fontWeight: '500' },
-  caption: { fontFamily: sans, fontSize: 12, lineHeight: 16, fontWeight: '500', letterSpacing: 0.2 },
+  caption: {
+    fontFamily: sans,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '500',
+    letterSpacing: 0.2,
+  },
   overline: {
     fontFamily: sans,
     fontSize: 11,

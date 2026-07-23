@@ -16,11 +16,7 @@ type DayControlsProps = {
 
 function DayControlsBase({ status, onStart, onPause, onResume, onEnd }: DayControlsProps) {
   return (
-    <Animated.View
-      key={status}
-      entering={FadeIn.duration(260)}
-      exiting={FadeOut.duration(160)}
-    >
+    <Animated.View key={status} entering={FadeIn.duration(260)} exiting={FadeOut.duration(160)}>
       {status === 'idle' ? (
         <Button label="Démarrer la journée" icon="sunrise" onPress={onStart} fullWidth />
       ) : (

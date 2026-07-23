@@ -1,11 +1,22 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { type CategoryId } from './categoriesStore';
+import { scoreForTotals } from '../features/stats/score';
+import {
+  deleteActivity,
+  insertActivity,
+  resetRemoteHistory,
+  updateActivityCategory,
+  upsertDayMeta,
+} from '../services/sync/days';
+import { safeSync } from '../services/sync/safeSync';
 import { zustandStorage } from '../services/storage';
-import { useSettingsStore } from './settingsStore';
 import { parseDayKey } from '../utils/dateRange';
 import { dayKey } from '../utils/time';
+import { randomUUID } from '../utils/uuid';
+import { useAuthStore } from './authStore';
+import { type CategoryId } from './categoriesStore';
+import { useSettingsStore } from './settingsStore';
 
 /** One completed, attributed segment of tracked time. */
 export type LogEntry = {
@@ -55,6 +66,8 @@ type Actions = {
   /** Remove a single logged entry entirely. */
   deleteEntry: (dayKey: string, entryId: string) => void;
   setNote: (dayKey: string, note: string) => void;
+  /** Replace the history with the server's current state — pull-side of sync only. */
+  hydrate: (history: History) => void;
 };
 
 export type TimerState = PersistedState & Actions;
@@ -92,8 +105,14 @@ function todayKey(): string {
   return dayKey(new Date(), useSettingsStore.getState().dayStartHour);
 }
 
-function makeEntryId(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+/** Push the day's current score + total to Supabase — cheap denormalized cache, cross-device. */
+function pushDayTotals(dayKeyValue: string, entries: readonly LogEntry[]): void {
+  const userId = useAuthStore.getState().user?.id;
+  if (!userId) return;
+  const totals = entriesToTotals(entries);
+  const totalMs = sumTotals(totals);
+  const score = scoreForTotals(totals);
+  safeSync(() => upsertDayMeta(userId, dayKeyValue, { totalMs, score }));
 }
 
 export function entriesToTotals(entries: readonly LogEntry[]): DayTotals {
@@ -131,13 +150,18 @@ export const useTimerStore = create<TimerState>()(
         let history = state.history;
         if (added > 0) {
           const entry: LogEntry = {
-            id: makeEntryId(),
+            id: randomUUID(),
             category: id,
             startedAt: state.segmentStartedAt ?? now,
             endedAt: now,
             ms: added,
           };
-          history = { ...state.history, [key]: { ...day, entries: [...day.entries, entry] } };
+          const entries = [...day.entries, entry];
+          history = { ...state.history, [key]: { ...day, entries } };
+
+          const userId = useAuthStore.getState().user?.id;
+          if (userId) safeSync(() => insertActivity(userId, key, entry));
+          pushDayTotals(key, entries);
         }
 
         set({
@@ -179,7 +203,11 @@ export const useTimerStore = create<TimerState>()(
         });
       },
 
-      resetAll: () => set({ ...initial }),
+      resetAll: () => {
+        set({ ...initial });
+        const userId = useAuthStore.getState().user?.id;
+        if (userId) safeSync(() => resetRemoteHistory(userId));
+      },
 
       undoLast: () => {
         const state = get();
@@ -190,6 +218,10 @@ export const useTimerStore = create<TimerState>()(
         const last = day.entries[day.entries.length - 1]!;
         const entries = day.entries.slice(0, -1);
         const history: History = { ...state.history, [key]: { ...day, entries } };
+
+        const userId = useAuthStore.getState().user?.id;
+        if (userId) safeSync(() => deleteActivity(last.id));
+        pushDayTotals(key, entries);
 
         if (state.status === 'idle') {
           set({ history });
@@ -216,6 +248,10 @@ export const useTimerStore = create<TimerState>()(
           e.id === entryId ? { ...e, category: newCategory } : e,
         );
         set({ history: { ...state.history, [key]: { ...day, entries } } });
+
+        const userId = useAuthStore.getState().user?.id;
+        if (userId) safeSync(() => updateActivityCategory(entryId, newCategory));
+        pushDayTotals(key, entries);
       },
 
       deleteEntry: (key, entryId) => {
@@ -224,13 +260,22 @@ export const useTimerStore = create<TimerState>()(
         if (!day) return;
         const entries = day.entries.filter((e) => e.id !== entryId);
         set({ history: { ...state.history, [key]: { ...day, entries } } });
+
+        const userId = useAuthStore.getState().user?.id;
+        if (userId) safeSync(() => deleteActivity(entryId));
+        pushDayTotals(key, entries);
       },
 
       setNote: (key, note) => {
         const state = get();
         const day = state.history[key] ?? EMPTY_DAY;
         set({ history: { ...state.history, [key]: { ...day, note } } });
+
+        const userId = useAuthStore.getState().user?.id;
+        if (userId) safeSync(() => upsertDayMeta(userId, key, { note }));
       },
+
+      hydrate: (history) => set({ history }),
     }),
     {
       name: 'byte.timer',

@@ -1,4 +1,4 @@
-import { type CategoryTotal } from './useStats';
+import { type CategoryTotal } from './score';
 
 export type DayProfile = { label: string; sentence: string };
 

@@ -9,7 +9,6 @@ import {
   selectVisibleCategories,
   useCategoriesStore,
 } from '../../stores/categoriesStore';
-import { useSettingsStore } from '../../stores/settingsStore';
 import { type DayTotals } from '../../stores/timerStore';
 import { spacing } from '../../theme/spacing';
 import { CategoryCard } from './CategoryCard';
@@ -22,7 +21,6 @@ type CategoryGridProps = {
 
 /** 2-column grid of activity cards with a staggered entrance. */
 function CategoryGridBase({ totals, disabled, onLog }: CategoryGridProps) {
-  const goals = useSettingsStore((s) => s.goals);
   const categories = useCategoriesStore(useShallow(selectVisibleCategories));
   const rows: Category[][] = [];
   for (let i = 0; i < categories.length; i += 2) {
@@ -44,7 +42,7 @@ function CategoryGridBase({ totals, disabled, onLog }: CategoryGridProps) {
                 <CategoryCard
                   category={cat}
                   totalMs={totals[cat.id] ?? 0}
-                  goalMs={goals[cat.id]}
+                  goalMs={cat.goalMs || undefined}
                   disabled={disabled}
                   onLog={onLog}
                 />

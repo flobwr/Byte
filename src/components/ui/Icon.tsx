@@ -23,7 +23,8 @@ export type IconName =
   | 'check'
   | 'close'
   | 'sun'
-  | 'moon';
+  | 'moon'
+  | 'logout';
 
 type IconProps = {
   name: IconName;
@@ -139,6 +140,12 @@ function IconBase({ name, size = 24, color, strokeWidth = 2 }: IconProps) {
       )}
       {name === 'moon' && (
         <Path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.5 6.5 0 0 0 10.2 10.2Z" {...common} />
+      )}
+      {name === 'logout' && (
+        <>
+          <Path d="M15 4H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h9" {...common} />
+          <Path d="M10 12h11M17.5 8.5 21 12l-3.5 3.5" {...common} />
+        </>
       )}
     </Svg>
   );
